@@ -5,6 +5,7 @@ const { removeSync } = fsExtra; // Destructure removeSync
 import { exec } from "child_process";
 import allureReporter from "@wdio/allure-reporter";
 import dotenv from "dotenv";
+import { getEnvironmentData } from "worker_threads";
 
 const env = process.env.TEST_ENV; // must be set via bash command
 dotenv.config({ path: `.env.${env}` });
@@ -40,18 +41,18 @@ export const config = {
   // of the config file unless it's absolute.
   //
   specs: [
-    //  './test/spec/Forgot_Password.spec.js',
-    // './test/spec/Login.spec.js',
-    // './test/spec/home.spec.js',
-    // './test/spec/setting.spec.js',
-    // './test/spec/Existing_Patient.spec.js',
-    //  './test/spec/New_Patient.spec.js',
+     './test/spec/English/Forgot_Password.spec.js',
+    './test/spec/English/Login.spec.js',
+    // './test/spec/English/home.spec.js',
+    // './test/spec/English/setting.spec.js',
+    // './test/spec/English/Existing_Patient.spec.js',
+    //  './test/spec/English/New_Patient.spec.js',
 
-    // './test/spec/Forgot_Password_ES.spec.js',
-    // './test/spec/Login_Es.spec.js',
-    // './test/spec/Settings_ES.spec.js',
-    // './test/spec/Existing_Patient_ES.spec.js',
-    './test/spec/New_Patient_ES.spec.js',
+    // './test/spec/Spanish/Forgot_Password_ES.spec.js',
+    // './test/spec/Spanish/Login_Es.spec.js',
+    // './test/spec/Spanish/Settings_ES.spec.js',
+    // './test/spec/Spanish/Existing_Patient_ES.spec.js',
+    // './test/spec/Spanish/New_Patient_ES.spec.js',
 
     
   ],
@@ -213,6 +214,14 @@ export const config = {
         outputDir: "allure-results",
         disableWebdriverStepsReporting: true,
         disableWebdriverScreenshotsReporting: false,
+        reportedEnvironmentVars: {
+          Environment: process.env.Environment,
+          device_name: process.env.Device_Name ,
+          platform_name: process.env.Platform_Name ,
+          platform_version: process.env.Platform_Version,
+          app_version: process.env.App_Version ,
+          automation_engine: process.env.Automation_Engine,
+        },
       },
     ],
 
@@ -314,8 +323,22 @@ export const config = {
   /**
    * Function to be executed before a test (in Mocha/Jasmine) starts.
    */
-  // beforeTest: function (test, context) {
-  // },
+  beforeTest(test) {
+    // parent and suite can be set here or inside your test file
+   
+
+    // Segrigate Positive or Negative automatically
+    const name = test.title.toLowerCase();
+
+    const negativeWords = ['error', 'fail', 'invalid', 'empty', 'expired', 'wrong'];
+    const isNegative = negativeWords.some(word => name.includes(word));
+
+    if (isNegative) {
+      allureReporter.addSubSuite('Negative');
+    } else {
+      allureReporter.addSubSuite('Positive');
+    }
+  },
   /**
    * Hook that gets executed _before_ a hook within the suite starts (e.g. runs before calling
    * beforeEach in Mocha)
@@ -341,9 +364,9 @@ export const config = {
   afterTest: async function (
     test,
     context,
-    { error, result, duration, passed, retries }
+    { error, result, duration, passed, retries,  }
   ) {
-    if (!passed || error || result) {
+    if (passed || error || result || !passed) {
       const screenshot = await browser.takeScreenshot();
       allureReporter.addAttachment(
         "Screenshot on Failure",

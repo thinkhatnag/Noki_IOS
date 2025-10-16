@@ -7,8 +7,17 @@ import RecordingPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectMo
 import AddPatientPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/addPatient.page.js';
 import { verify,  verifyAndClick  } from '/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js';
 import LoginPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page'
-describe('Home Screen elements functinalities and flows are verified here ', () => {
-
+describe("English", () => {
+    beforeEach(() => {
+      allureReporter.addEpic("NOKI IOS Automation");
+      allureReporter.addOwner("Mobile Team");
+      allureReporter.addParentSuite("English");
+    });
+    describe("Existing Patient", () => {
+      beforeEach(() => {
+        allureReporter.addSuite("Existing Patient");
+      });
+  
     it('Verify all tab bar elements are working correctly {TC11}', async() => {
         await HomePage.patients.click();
         await verify(PatientsPage.patientSearch)
@@ -18,6 +27,7 @@ describe('Home Screen elements functinalities and flows are verified here ', () 
         await verify(SettingsPage.profileSettings)
         await LoginPage.restartApp()
     });
+})
 })
 //     it('Verify the audio recording process {TC12}', async() => {
 //         await HomePage.startNewEncounterButton.click();

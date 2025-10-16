@@ -1,4 +1,4 @@
-import loginPage from "./login.page";
+import loginPage from "..screenObjectModel/login.page.js";
 import {
   waitForElement,
   verifyAndClick,
@@ -7,15 +7,16 @@ import {
   aeroplaneModeOff,
   playTTS,
   LiveTranscript,
-} from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
-import AudioManager from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/audioManeger.js";
+  validate,
+} from "../../helpers/helper.js";
+import AudioManager from "../screenObjectModel/audioManeger.js";
 import { faker } from "@faker-js/faker";
 
-import LoginPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page.js";
-import RecordingPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/recording.page.js";
-import HomePage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/home.page.js";
-import EncounterPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/encounter.page.js";
-import AudioManeger from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/audioManeger.js";
+import LoginPage from "../screenObjectModel/login.page.js";
+import RecordingPage from "../screenObjectModel/recording.page.js";
+import HomePage from "../screenObjectModel/home.page.js";
+import EncounterPage from "../screenObjectModel/encounter.page.js";
+import AudioManeger from "../screenObjectModel/audioManeger.js";
 class SpanishLanguage {
   get Done() {
     return $("~Done");
@@ -39,7 +40,9 @@ class SpanishLanguage {
     return $("~Se requiere Contraseña");
   }
   get WrongPassword() {
-    return $("~La contraseña no es válida o el usuario no tiene contraseña.");
+    return $(
+      "~La contraseña no es válida o el usuario no tiene una contraseña."
+    );
   }
   get emailError() {
     return $("~Se requiere el correo electrónico");
@@ -424,26 +427,47 @@ class SpanishLanguage {
     await driver.pause(5000);
     await driver.activateApp(process.env.BUNDLE_ID);
   }
-  async launguageAndGeneralSettings() {
-    await verifyAndClick(this.settings);
-    await verifyAndClick(this.Idioma);
-    await verifyAndClick(this.english);
-    await verify(this.launguage);
-    await verifyAndClick(this.launguage);
-    await verifyAndClick(this.spanish);
-    await verifyAndClick(this.generalSetting);
+
+  async generalSettingsUpdate() {
+    await verifyAndClick(this.generalSettings);
     await verifyAndClick(this.selectAllOff);
-    await verifyAndClick(this.settingPageDone);
-    await verifyAndClick(this.generalSetting);
+    await verifyAndClick(this.Done);
+    await verifyAndClick(this.generalSettings);
     await verify(this.cdssDisabled);
     await verify(this.diognosisJustificationDisabled);
     await verifyAndClick(this.selectAllOn);
-    await verifyAndClick(this.settingPageDone);
-    await verifyAndClick(this.generalSetting);
-    await verify(this.selectAllOff);
-    await verify(this.cdss);
-    await verify(this.diognosisJustification);
-    await verifyAndClick(this.settingPageDone);
+    await verifyAndClick(this.Done);
+    await verifyAndClick(this.generalSettings);
+    await validate(this.selectAllOff);
+    await validate(this.cdss);
+    await validate(this.diognosisJustification);
+    await verifyAndClick(this.cancel);
+    await verifyAndClick(this.generalSettings);
+    await verifyAndClick(this.cdss);
+    await verifyAndClick(this.Done);
+    await verifyAndClick(this.generalSettings);
+    await validate(this.cdssDisabled);
+    await verifyAndClick(this.cdssDisabled);
+    await verifyAndClick(this.Done);
+    await verifyAndClick(this.generalSettings);
+    await validate(this.diognosisJustification);
+    await verifyAndClick(this.diognosisJustification);
+    await verifyAndClick(this.Done);
+    await verifyAndClick(this.generalSettings);
+    await validate(this.diognosisJustificationDisabled);
+    await verifyAndClick(this.diognosisJustificationDisabled);
+    await verifyAndClick(this.Done);
+    await verifyAndClick(this.generalSettings);
+    await validate(this.selectAllOff);
+    await verifyAndClick(this.cancel);
+  }
+  async launguageChange() {
+    await verifyAndClick(this.settings);
+    await verifyAndClick(this.Idioma);
+    await verifyAndClick(this.english);
+    await validate(this.launguage);
+    await verifyAndClick(this.launguage);
+    await verifyAndClick(this.spanish);
   }
 
   get homeScreenAnimation() {
@@ -705,9 +729,10 @@ class SpanishLanguage {
   get Back() {
     return $("~Left");
   }
-  get ContinueBtn() {
-    return $('//XCUIElementTypeButton[@name="CONTINUAR"]');
+  get endEncounterBtn() {
+    return $('//XCUIElementTypeButton[@name="Finalizar el encuentro"]');
   }
+
   get saveAsDraftBtn() {
     return $('//XCUIElementTypeButton[@name="GUARDAR COMO BORRADOR"]');
   }
@@ -956,7 +981,7 @@ class SpanishLanguage {
     return $("~micIcon");
   }
   get send() {
-    return $("~sendVoiceBtn");
+    return $("~send_btn");
   }
   get finaliseEncounter() {
     return $("~finalizedBtn");
@@ -1073,7 +1098,7 @@ class SpanishLanguage {
     return $("~Ok");
   }
   get addPatientInformation() {
-    return $(`~+  Add Información del Paciente`);
+    return $(`~+  Add Información del paciente`);
   }
   get save() {
     return $('//XCUIElementTypeButton[@name="Guardar"]');
@@ -1134,7 +1159,7 @@ class SpanishLanguage {
   }
 
   get offlineModeRTranscription() {
-    return $("~No hay transcripción disponible en el modo sin conexión");
+    return $("");
   }
 
   get() {
@@ -1175,6 +1200,7 @@ class SpanishLanguage {
     await waitForElement(this.copyBtn);
     await verifyAndClick(this.copyBtn);
     await verifyAndClick(this.mailBtn);
+    await validate(this.emailSentOk);
     await verifyAndClick(this.emailSentOk);
     await verifyAndClick(this.printBtn);
     await verify(this.printDownload);
@@ -1184,6 +1210,7 @@ class SpanishLanguage {
   }
   async SOAP_NOTE() {
     await waitForElement(this.quickActionButton);
+
     await this.quickActionButton.click();
     await verify(this.quicktionsSearchField);
     await verifyAndClick(this.regenerateSoapNote);
@@ -1289,10 +1316,12 @@ class SpanishLanguage {
   //AddPatitent Screen Functions
   async createNewPatient() {
     const name = faker.person.fullName();
+    const cleanName = name.replace(/[^a-zA-Z0-9 ]/g, "");
+
     const year = faker.number.int({ min: 1920, max: 2023 });
     const month = faker.number.int({ min: 1, max: 12 });
     await verifyAndClick(this.newpatientName);
-    await this.newpatientName.setValue(name);
+    await this.newpatientName.setValue(cleanName);
     await this.dobPicker.click();
     await this.previousMonth.click();
     await this.nextMonth.click();
@@ -1382,15 +1411,23 @@ class SpanishLanguage {
   async recordAudio() {
     await driver.pause(4000);
     await AudioManeger.playAudio("spanish");
+    await driver.pause(80000);
+    await AudioManeger.stopAudio();
+    await verifyAndClick(this.pauseBtn);
+    await verifyAndClick(this.stopBtn);
+  }
+  async recordOfflineAudio() {
+    await driver.pause(4000);
+    await AudioManeger.playAudio("spanish");
     await driver.pause(5000);
     await aeroplaneModeOn();
     await driver.pause(5000);
     await verify(this.offlineModeRTranscription);
-    await driver.pause(30000);
+    await driver.pause(40000);
     await aeroplaneModeOff();
     await driver.pause(5000);
     await LiveTranscript();
-    await driver.pause(50000);
+    await driver.pause(20000);
     await AudioManeger.stopAudio();
     await verifyAndClick(this.pauseBtn);
     await verifyAndClick(this.stopBtn);
@@ -1427,7 +1464,7 @@ class SpanishLanguage {
   async Transcript_Verification() {
     await verifyAndClick(this.Transcript);
     await RecordingPage.dataScanning(RecordingPage.cleanedTranscriptScroll);
-    // await AudioManager.TextComparison()
+    await AudioManager.TextComparison("spanish")
     await verifyAndClick(this.originalTrnscript);
     await verifyAndClick(this.claeanedTranscript);
     await verifyAndClick(this.SoapNoteBtn);
@@ -1460,7 +1497,7 @@ class SpanishLanguage {
     await waitForElement(this.SoapNoteBtn);
     await this.finaliseEncounter.click();
     await this.ok.click();
-    await verify(this.finaliseEncounteSuccessrTxt);
+    await validate(this.finaliseEncounteSuccessrTxt);
     await driver.pause(5000);
     await LoginPage.restartApp();
   }
@@ -1539,9 +1576,9 @@ class SpanishLanguage {
     await aeroplaneModeOn();
     await driver.pause(5000);
     await AudioManeger.pauseAudio();
-    await driver.terminateApp("com.thinkhat.noki");
+    await driver.terminateApp(process.env.BUNDLE_ID);
     await driver.pause(5000);
-    await driver.activateApp("com.thinkhat.noki");
+    await driver.activateApp(process.env.BUNDLE_ID);
     await driver.pause(5000);
     await verifyAndClick(this.ContinueBtn);
     console.log(
@@ -1597,7 +1634,7 @@ class SpanishLanguage {
       await driver.pause(5000);
       await aeroplaneModeOn();
       await driver.pause(5000);
-      await verify(this.offlineModeRTranscription);
+      await validate(this.offlineModeRTranscription);
       await driver.pause(30000);
       await aeroplaneModeOff();
       count++;
@@ -1638,7 +1675,7 @@ class SpanishLanguage {
     await waitForElement(this.COK);
     await verifyAndClick(this.COK);
     await this.bloodGroup("Grupo sanguíneo");
-    await this.bloodName("O postivo");
+    await this.bloodName("B postivo");
   }
 
   get SoapNoteScreenTxtFieldEntry() {
@@ -1650,13 +1687,15 @@ class SpanishLanguage {
   async manualUpdate() {
     await waitForElement(this.SoapNoteScreenTxtField);
     await verifyAndClick(this.SoapNoteScreenTxtField);
-    await this.SoapNoteScreenTxtFieldEntry.setValue("Grupo sanguíneo O postivo");
+    await this.SoapNoteScreenTxtFieldEntry.setValue(
+      "Grupo sanguíneo O postivo"
+    );
     await verifyAndClick(this.doneBtn);
     await verifyAndClick(this.send);
     await waitForElement(this.COK);
     await verifyAndClick(this.COK);
     await this.bloodGroup("Grupo sanguíneo");
-    await this.bloodName("O negativo");
+    await this.bloodName("O postivo");
   }
   get MicStop() {
     return $("~micBackgroundImage");
@@ -1671,6 +1710,7 @@ class SpanishLanguage {
     await verifyAndClick(this.MicStop);
     await verifyAndClick(this.send);
     await waitForElement(this.COK);
+    await validate(this.COK);
     await verifyAndClick(this.COK);
     await this.bloodGroup("Grupo sanguíneo");
     await this.bloodName("O negativo");

@@ -5,18 +5,24 @@ import {
   aeroplaneModeOff,
   aeroplaneModeOn,
   LiveTranscript,
+  validate,
+  aeroplanemodeswipe,
 } from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
 import allureReporter from "@wdio/allure-reporter";
-import AudioManeger from "../screenObjectModel/audioManeger.js";
+import AudioManeger from "../../screenObjectModel/audioManeger.js";
 
 import SettingsPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/setting.page.js";
-import SpanishLanguage from "../screenObjectModel/spanishLanguage.js";
-describe("New patient E2E flow -Spnish", () => {
+import SpanishLanguage from "../../screenObjectModel/spanishLanguage.js";
+describe("Spanish", () => {
   beforeEach(() => {
     allureReporter.addEpic("NOKI IOS Automation");
-    allureReporter.addFeature("Existing patient E2E -Es");
     allureReporter.addOwner("Mobile Team");
+    allureReporter.addParentSuite("Spanish");
   });
+  describe("Existing Patient", () => {
+    beforeEach(() => {
+      allureReporter.addSuite("New Patient");
+    });
 
   it("Intiating the conversation for a Newly created Patient", async () => {
     await waitForElement(SpanishLanguage.startNewEncounter);
@@ -41,18 +47,19 @@ describe("New patient E2E flow -Spnish", () => {
     await driver.pause(30000); //again playing audio for 1 min in online
     await AudioManeger.pauseAudio();
     await driver.pause(2000);
-
     await aeroplaneModeOn();
-
     await driver.pause(5000);
     await AudioManeger.pauseAudio();
   });
-  it.skip("Offline mode app kill state verification", async () => {
+  it("Offline mode app kill state verification", async () => {
     await driver.terminateApp(process.env.BUNDLE_ID); // step verifying the app screen to be in recording screen only even in offline
     await driver.pause(5000);
-    await driver.activateApp("com.thinkhat.noki");
+    await driver.activateApp(process.env.BUNDLE_ID);
     // await verifyAndClick(SpanishLanguage.errorOk)
     await waitForElement(SpanishLanguage.ContinueBtn);
+    await validate(SpanishLanguage.ContinueBtn);
+    await validate(SpanishLanguage.discardBtn)
+    await validate(SpanishLanguage.endEncounterBtn)
     await verifyAndClick(SpanishLanguage.ContinueBtn);
     console.log(
       "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
@@ -69,23 +76,8 @@ describe("New patient E2E flow -Spnish", () => {
     await driver.pause(5000);
     await verify(SpanishLanguage.offlineConversationSaved);
 
-    await driver
-      .action("pointer")
-      .move({ duration: 0, x: 355, y: 22 })
-      .down({ button: 0 })
-      .move({ duration: 1000, x: 354, y: 720 })
-      .up({ button: 0 })
-      .perform();
-    const airplaneModeBtn = await $("~com.apple.ControlCenter.Airplane");
-    await (await airplaneModeBtn).click();
-
-    await driver
-      .action("pointer")
-      .move({ duration: 0, x: 283, y: 790 })
-      .down({ button: 0 })
-      .pause(50)
-      .up({ button: 0 })
-      .perform(); // device come to online
+     // device come to online
+     await aeroplanemodeswipe()
     await driver.pause(5000);
     console.log(
       "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved"
@@ -139,4 +131,4 @@ describe("New patient E2E flow -Spnish", () => {
     await SpanishLanguage.finalize_Encounter();
   });
 });
-x
+})

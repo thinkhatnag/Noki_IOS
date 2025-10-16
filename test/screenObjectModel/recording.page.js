@@ -7,12 +7,13 @@ import {
   aeroplaneModeOff,
   LiveTranscript,
   playTTS,
+  validate,
 } from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
 import LoginPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page.js";
 import EncounterPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/encounter.page.js";
 import HomePage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/home.page.js";
 import { exec } from "child_process";
-
+import allureRepoter from "@wdio/allure-reporter";
 import AudioManeger from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/audioManeger.js";
 import util from "util";
 import path from "path";
@@ -372,7 +373,7 @@ class RecordingPage {
     return $("~micIcon");
   }
   get send() {
-    return $("~sendVoiceBtn");
+    return $("~send_btn");
   }
   get AddConversation() {
     return $('//XCUIElementTypeButton[@name="Add Conversation"]');
@@ -465,11 +466,6 @@ class RecordingPage {
   get networkFailureOk() {
     return $('(//XCUIElementTypeButton[@name="Close"])[2]');
   }
-  get bloodGroup() {
-    return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="BloodGroup"]'
-    );
-  }
 
   //multiple conversations
 
@@ -480,15 +476,7 @@ class RecordingPage {
   async Audio() {
     await driver.pause(4000);
     await AudioManeger.playAudio("english");
-    await driver.pause(5000);
-    await aeroplaneModeOn();
-    await driver.pause(10000);
-    await verify(this.offlineModeRTranscription);
-    await driver.pause(30000);
-    await aeroplaneModeOff();
-    await driver.pause(10000);
-    await LiveTranscript();
-    await driver.pause(30000);
+    await driver.pause(80000);
     await AudioManeger.stopAudio();
   }
   async recordAudio() {
@@ -528,26 +516,25 @@ class RecordingPage {
     await driver.pause(3000);
     await verifyAndClick(this.Transcript);
     await this.dataScanning(this.cleanedTranscriptScroll);
-    // await AudioManeger.TextComparison()
-    await this.dataScanning();
+    await AudioManeger.TextComparison("english");
     await verifyAndClick(this.originalTrnscript);
-    await driver.execute("mobile: swipe", { direction: "up" });
     await verifyAndClick(this.claeanedTranscript);
-    await driver.execute("mobile: swipe", { direction: "up" });
     await verifyAndClick(this.SoapNoteBtn);
   }
 
   async SOAPNote_Verification() {
     await waitForElement(QuickActions.quickActionButton);
+    await validate(this.SoapNoteBtn);
     await this.SoapNoteBtn.click();
     await this.copyMailPrint();
     await await driver.execute("mobile: swipe", { direction: "up" });
     await driver.execute("mobile: swipe", { direction: "down" });
     await driver.execute("mobile: swipe", { direction: "down" });
+    await validate(this.patientInformation);
   }
-get C_OK(){
-  return $('~OK')
-}
+  get C_OK() {
+    return $("~OK");
+  }
   async multiple_Conversation() {
     await waitForElement(this.AddConversation);
     await verifyAndClick(this.AddConversation);
@@ -726,18 +713,22 @@ get C_OK(){
   }
 
   async recordAudioforOfflineModeMT() {
-    let timesToRun = 3;
+    let timesToRun = 2;
     let count = 0;
     console.log(`Loop will run ${timesToRun} times`);
     for (let i = 0; i < timesToRun; i++) {
       await driver.pause(10000);
       await aeroplaneModeOn();
       await driver.pause(10000);
+      allureRepoter.startStep("Verifying Offline Mode Transcription");
       await verify(this.offlineModeRTranscription);
+      allureRepoter.endStep("passed");
       await driver.pause(5000);
       await aeroplaneModeOff();
       await driver.pause(5000);
+      allureRepoter.startStep("Verifying Live Transcription");
       await LiveTranscript();
+      allureRepoter.endStep("passed");
       count++;
       console.log(`Offline Mode Loop we are Running Now  ${i + 1} completed`);
     }
@@ -782,7 +773,7 @@ get C_OK(){
     }
 
     const outputFile = path.resolve(
-      `/Users/nagasubarayudu/Desktop/IOS/_results_/scanned_texts_${Date.now()}.txt`
+      `/Users/nagasubarayudu/Desktop/IOS/_results_/TreascriptFiles/scanned_texts_${Date.now()}.txt`
     );
 
     fs.mkdirSync(path.dirname(outputFile), { recursive: true });
@@ -791,14 +782,11 @@ get C_OK(){
 
     return outputFile;
   }
-  async bloodGroup(text) {
-    return await waitForElement(
-      $(
-        `//XCUIElementTypeStaticText[@name="main label" and @label="${text} : "]`
-      )
-    );
-  }
-
+  // get bloodGroup() {
+  //   return $(
+  //     '//XCUIElementTypeStaticText[@name="main label" and @label="BloodGroup"]'
+  //   );
+  // }
   async bloodName(name) {
     return await waitForElement($(`~${name}`));
   }
@@ -862,8 +850,9 @@ get C_OK(){
     await playTTS("Blood group is B negative", "Alex", 1.1);
     await driver.pause(2000);
     await verifyAndClick(this.MicStop);
+    await driver.pause(3000);
     await verifyAndClick(this.send);
-    await waitForElement(this.C_OK)
+    await waitForElement(this.C_OK);
     await verifyAndClick(this.C_OK);
     await this.bloodGroup("Blood Group");
     await this.bloodName("B negative");

@@ -10,21 +10,24 @@ import {
   verifyAndClick,
   waitForElement,
   aeroplaneModeOff,
-  aeroplaneModeOn
+  aeroplaneModeOn,
+  aeroplanemodeswipe
 } from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
 import allureReporter from "@wdio/allure-reporter";
-import AudioManeger from '../screenObjectModel/audioManeger.js'
+import AudioManeger from '../../screenObjectModel/audioManeger.js'
 import SettingsPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/setting.page.js";
 import AddPatitentPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/addPatient.page.js";
 import QuickActions from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/quickActions.page.js";
-describe('new patient E2E flow -English ', () => {
+describe("English", () => {
   beforeEach(() => {
-    allureReporter.addEpic('NOKI IOS Automation');
-    allureReporter.addFeature('Existing patient E2E -En');
-    allureReporter.addOwner('Mobile Team');
-
-});
-
+    allureReporter.addEpic("NOKI IOS Automation");
+    allureReporter.addOwner("Mobile Team");
+    allureReporter.addParentSuite("English");
+  });
+  describe("New patient E2E Flow ", () => {
+    beforeEach(() => {
+      allureReporter.addSuite("New patient E2E Flow ");
+    });
   it('Intiating the conversation for a Newly created Patient', async() => {
     await waitForElement(HomePage.startNewEncounterButton);
     await HomePage.startNewEncounterButton.click();
@@ -79,23 +82,8 @@ describe('new patient E2E flow -English ', () => {
     await driver.pause(5000);
     await verify(RecordingPage.offlineConversationSaved);
     
-    await driver
-      .action("pointer")
-      .move({ duration: 0, x: 355, y: 22 })
-      .down({ button: 0 })
-      .move({ duration: 1000, x: 354, y: 720 })
-      .up({ button: 0 })
-      .perform();
-    const airplaneModeBtn = await $("~com.apple.ControlCenter.Airplane");
-    await (await airplaneModeBtn).click();
-
-    await driver
-      .action("pointer")
-      .move({ duration: 0, x: 283, y: 790 })
-      .down({ button: 0 })
-      .pause(50)
-      .up({ button: 0 })
-      .perform();         // device come to online
+     // device come to online
+     await aeroplanemodeswipe()
     await driver.pause(5000);
     console.log(
       "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved"
@@ -151,4 +139,5 @@ describe('new patient E2E flow -English ', () => {
     await RecordingPage.finalize_Encounter()
   }); 
 
+})
 })
