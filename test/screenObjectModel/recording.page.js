@@ -1,0 +1,867 @@
+import {
+  verifyAndClick,
+  verify,
+  waitForElement,
+  swipe,
+  aeroplaneModeOn,
+  aeroplaneModeOff,
+  LiveTranscript,
+  playTTS,
+  validate,
+} from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
+import LoginPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page.js";
+import EncounterPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/encounter.page.js";
+import HomePage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/home.page.js";
+import { exec } from "child_process";
+import allureRepoter from "@wdio/allure-reporter";
+import AudioManeger from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/audioManeger.js";
+import util from "util";
+import path from "path";
+import fs from "fs";
+import QuickActions from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/quickActions.page.js";
+
+const execPromise = util.promisify(exec);
+
+class RecordingPage {
+  get search() {
+    return $("~Search");
+  }
+  get ok() {
+    return $("~Ok");
+  }
+  get back() {
+    return $('//XCUIElementTypeButton[@name="backArrow"]');
+  }
+  get RecordingBack() {
+    return $("~Left");
+  }
+  get ContinueBtn() {
+    return $('//XCUIElementTypeButton[@name="CONTINUE"]');
+  }
+  get saveAsDraftBtn() {
+    return $('//XCUIElementTypeButton[@name="SAVE AS A DRAFT"]');
+  }
+  get discardBtn() {
+    return $('//XCUIElementTypeButton[@name="DISCARD"]');
+  }
+  get templateSoapNote() {
+    return $('//XCUIElementTypeTextField[@value="SOAP Note"]');
+  }
+  get launguageSelectior() {
+    return $('//XCUIElementTypeTextField[@value="English"]');
+  }
+  get launguageSelectText() {
+    return $('//XCUIElementTypeStaticText[@name="Select a scribe Language"]');
+  }
+  get doneBtn() {
+    return $("~Done");
+  }
+  get englishLanOpt() {
+    return $("~English");
+  }
+  get spanishLanOpt() {
+    return $("~Español");
+  }
+  get confirmationText() {
+    return $(
+      '//XCUIElementTypeTextView[@value="Please ensure you have verbal consent from the patient before using Noki\'s AI ambient scribe for clinical documentation. View Consent"]'
+    );
+  }
+
+  get confirmationTextCheckBox() {
+    return $("~checkmark.square.fill");
+  }
+
+  get startConversationBtn() {
+    return $('//XCUIElementTypeButton[@name="Start Conversation"]');
+  }
+  get txtConfm() {
+    return $(
+      "~Please ensure you have verbal consent from the patient before using Noki's AI ambient scribe for clinical documentation. View Consent"
+    );
+  }
+  get pauseBtn() {
+    return $("~Pause");
+  }
+  get patientCreatedOk() {
+    return $("~OK");
+  }
+  get resumeRecording() {
+    return $('//XCUIElementTypeButton[@name="Resume Recording"]');
+  }
+  get resumeRecordingConformationYes() {
+    return $('//XCUIElementTypeButton[@name="YES"]');
+  }
+
+  get resumeRecordingConformationNO() {
+    return $('//XCUIElementTypeButton[@name="NO"]');
+  }
+
+  get stopBtn() {
+    return $("~stopRecord");
+  }
+  get playBtn() {
+    return $("~playBtnIcon");
+  }
+  get PrevEncounterRef() {
+    return $(
+      "~Would you like to use the previous encounter's SOAP note as context?"
+    );
+  }
+  get PrevEncounterRefNo() {
+    return $('//XCUIElementTypeButton[@name="NO"]');
+  }
+  get PrevEncounterRefYes() {
+    return $('//XCUIElementTypeButton[@name="YES"]');
+  }
+  get notEnoughTranscript() {
+    return $("~Not enough transcript to generate clinical notes.");
+  }
+  get notEnoughTranscriptOk() {
+    return $('//XCUIElementTypeButton[@name="OK"]');
+  }
+
+  get SoapNoteBtn() {
+    return $("~SOAP Note");
+  }
+  get soapNoteTable() {
+    return $("~scrollView");
+  }
+  get patientInformation() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]'
+    );
+  }
+  get subjective() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Subjective"]'
+    );
+  }
+  get objective() {
+    return $('//XCUIElementTypeStaticText[@name="Objective"]');
+  }
+  get assessment() {
+    return $('//XCUIElementTypeStaticText[@name="Assessment"]');
+  }
+  get plan() {
+    return $('//XCUIElementTypeStaticText[@name="Plan"]');
+  }
+  get additinalInformation() {
+    return $('//XCUIElementTypeStaticText[@name="Additional Information"]');
+  }
+  get name() {
+    return $('//XCUIElementTypeTextField[@value="Name :"]');
+  }
+  get age() {
+    return $('//XCUIElementTypeTextField[@value="Age :"]');
+  }
+  get gender() {
+    return $('//XCUIElementTypeTextField[@value="Gender :"]');
+  }
+  get encounterDate() {
+    return $('//XCUIElementTypeTextField[@value="Encounter Date :"]');
+  }
+
+  get chiefComplain() {
+    return $("~Chief Complaint CC");
+  }
+  get historyofprsentIllness() {
+    return $("~History of Present Illness HPI");
+  }
+  get pastMedicalHistory() {
+    return $("~Past Medical History");
+  }
+  get socialHistory() {
+    return $("~Social History");
+  }
+  get familyHistory() {
+    return $("~Review of Systems ROS");
+  }
+  get reviewofSystems() {
+    return $("~Review of Systems ROS");
+  }
+  get vitalSigns() {
+    return $("~Vital Signs");
+  }
+  get generallAppearance() {
+    return $("~General Appearance");
+  }
+  get physicalApperence() {
+    return $("~Physical Examination");
+  }
+  get Diognosis() {
+    return $('(//XCUIElementTypeStaticText[@name="Diagnosis :"])[3]');
+  }
+  get clinicalImpression() {
+    return $("~Treatment Plan");
+  }
+  get treatmentPlan() {
+    return $("~Treatment Plan");
+  }
+  get patitentEducation() {
+    return $("~Patient Education");
+  }
+  get followUp() {
+    return $("~Follow-Up");
+  }
+  get medications() {
+    return $("~Medications");
+  }
+
+  get allergies() {
+    return $("~Allergies");
+  }
+  get immunization() {
+    return $("~Immunizations");
+  }
+  get referal() {
+    return $('//XCUIElementTypeTextView[@name="Referral"]');
+  }
+
+  get Transcript() {
+    return $("~Transcript");
+  }
+  get Cdss() {
+    return $("~CDSS");
+  }
+  get CDSSLimitExceded() {
+    return $("~No CDSS Data Found");
+  }
+  get SuggestedDiagnosisAndInterventions() {
+    return $("~Suggested Diagnosis and Interventions");
+  }
+  get SuggestedQuestions() {
+    return $("~Suggested Questions");
+  }
+  get SuggestedMedications() {
+    return $("~Suggested Medications");
+  }
+  get SuggestedFollowups() {
+    return $("~Suggested Diagnostic Testing");
+  }
+
+  get originalTrnscript() {
+    return $('//XCUIElementTypeButton[@name="Show Original Transcript"]');
+  }
+  get originalTrnscriptTableView() {
+    return $("");
+  }
+  get claeanedTranscript() {
+    return $('//XCUIElementTypeButton[@name="Show Cleaned Transcript"]');
+  }
+  get claeanedTranscriptTableView() {
+    return $('//XCUIElementTypeButton[@name="Show Cleaned Transcript"]');
+  }
+  get copyBtn() {
+    return $("~copy");
+  }
+  get update() {
+    return $("~pencil.line");
+  }
+  get AddPatientInformation() {
+    return $("~+  Add Patient Information");
+  }
+  get AddPatientInformationInSpanish() {
+    return $("~+  Add Información del Paciente");
+  }
+  get save() {
+    return $('//XCUIElementTypeStaticText[@name="Save"]');
+  }
+  get cancel() {
+    return $('//XCUIElementTypeStaticText[@name="Cancel"]');
+  }
+
+  get titleInSpanish() {
+    return $('(//XCUIElementTypeTextView[@value="Título"])[1]');
+  }
+  get discriptionInSpanish() {
+    return $('(//XCUIElementTypeTextView[@value="Descripción"])[1]');
+  }
+  get add() {
+    return $('(//XCUIElementTypeButton[@name="selected"])[1]');
+  }
+  get clearPatientInfo() {
+    return $('(//XCUIElementTypeStaticText[@name="❌"])[1]');
+  }
+  get patientInfoRequiredPopUp() {
+    return $("~Patient Information is Required");
+  }
+  get soapNoteUpdatedSucessPopUP() {
+    return $("~Soap Note Updated Successfully");
+  }
+
+  get resumeConversationForMultipleConverstionScenario() {
+    return $('//XCUIElementTypeButton[@name="Resume Conversation"]');
+  }
+  get resumeConversationForMultipleConverstionScenarioYes() {
+    return $('//XCUIElementTypeButton[@name="Yes"]');
+  }
+  get resumeConversationForMultipleConverstionScenarioNo() {
+    return $('//XCUIElementTypeButton[@name="No"]');
+  }
+  get popUpForForTheFinalazeEncounterOfDraftTranscript() {
+    return $("~Please continue or delete the draft to finalize the encounter.");
+  }
+  get cleanedTranscriptScroll() {
+    return $(
+      '//XCUIElementTypeApplication[@name="Noki-T"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView'
+    );
+  }
+  get offlineModeRTranscription() {
+    return $("~No transcript available in offline mode");
+  }
+  get offlineConversationSaved() {
+    return $(
+      `//XCUIElementTypeStaticText[@name="We’ve saved your conversation. It’ll sync when you’re connected again."]`
+    );
+  }
+    get endEncounter() {
+    return $(
+      `//XCUIElementTypeStaticText[@name="End Encounter"]`
+    );
+  }
+
+  get mailBtn() {
+    return $("~mail");
+  }
+  get emailSentOk() {
+    return $("~OK");
+  }
+  get printBtn() {
+    return $("~print");
+  }
+  get printPagePrintBtn() {
+    return $("~Print");
+  }
+  get printConformation() {
+    return $('(//XCUIElementTypeButton[@name="Print"])[2]');
+  }
+  get printDownload() {
+    return $("~Download");
+  }
+  get printDownloadCopyOption() {
+    return $('//XCUIElementTypeCell[@name="Copy"]');
+  }
+  get printDownloadMarkup() {
+    return $('//XCUIElementTypeStaticText[@name="Markup"]');
+  }
+  get printDownloadPrint() {
+    return $('//XCUIElementTypeStaticText[@name="Print"]');
+  }
+  get printDownloadAddTags() {
+    return $('//XCUIElementTypeStaticText[@name="Add Tags"]');
+  }
+  get printDownloadSaveToFiles() {
+    return $('//XCUIElementTypeStaticText[@name="Save to Files"]');
+  }
+  get printDownloadExitActions() {
+    return $('//XCUIElementTypeButton[@name="Edit Actions…"]');
+  }
+  get pdfSavedOk() {
+    return $("~Ok");
+  }
+
+  get printPageOptions() {
+    return $('//XCUIElementTypeStaticText[@name="Options"]');
+  }
+  get printCancel() {
+    return $("~Cancel");
+  }
+  get printPageCancel() {
+    return $("~Cancel");
+  }
+  get printPageBackBtn() {
+    return $("~Left");
+  }
+
+  get Mic() {
+    return $("~micIcon");
+  }
+  get send() {
+    return $("~send_btn");
+  }
+  get AddConversation() {
+    return $('//XCUIElementTypeButton[@name="Add Conversation"]');
+  }
+
+  get AddConversationConfirmationYes() {
+    return $('//XCUIElementTypeButton[@name="Yes"]');
+  }
+
+  get AddConversationNo() {
+    return $('//XCUIElementTypeButton[@name="No"]');
+  }
+
+  get finaliseEncounter() {
+    return $("~finalizedBtn");
+  }
+
+  get finaliseEncounterTxt() {
+    return $(
+      "~Are you sure to finalize the encounter and disable all the actions available ?"
+    );
+  }
+  get finaliseEncounterOk() {
+    return $('//XCUIElementTypeButton[@name="Ok"]');
+  }
+  get errorOk() {
+    return $("~Ok");
+  }
+  get finaliseEncounterCancel() {
+    return $('//XCUIElementTypeButton[@name="Cancel"]');
+  }
+  get finaliseEncounteSuccesseTxt() {
+    return $('//XCUIElementTypeStaticText[@name="Success"]');
+  }
+  get finaliseEncounterSuccess() {
+    return $("~Encounter Finalised Successfully");
+  }
+  get finaliseEncounterConformed() {
+    return $("~Ok");
+  }
+  get PatientInfo() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]'
+    );
+  }
+  get Subject() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Subjective"]'
+    );
+  }
+  get Object() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Objective"]'
+    );
+  }
+  get Assessment() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Assessment"]'
+    );
+  }
+  get Plan() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Plan"]'
+    );
+  }
+  get AdditionalInfo() {
+    return $(
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Additional Information"]'
+    );
+  }
+  get connectionLost() {
+    return $("~Connection Lost!");
+  }
+  get connectionLostOk() {
+    return $('(//XCUIElementTypeButton[@name="Close"])[2]');
+  }
+  get MicStop() {
+    return $("~micBackgroundImage");
+  }
+
+  get backToPatientScreen() {
+    return $("~Left");
+  }
+  get networkFailure() {
+    return $("~No internet connection found. Please check your connection.");
+  }
+  get acknowledgeCheckBox() {
+    return $("~square");
+  }
+  get networkFailureOk() {
+    return $('(//XCUIElementTypeButton[@name="Close"])[2]');
+  }
+
+  //multiple conversations
+
+  get cdssFromCurrentConversation() {
+    return $("");
+  }
+
+  async Audio() {
+    await driver.pause(4000);
+    await AudioManeger.playAudio("english");
+    await driver.pause(80000);
+    await AudioManeger.stopAudio();
+  }
+  async recordAudio() {
+    await this.Audio();
+    await this.stopBtn.click();
+  }
+  async CDSS_Verification() {
+    if (await this.notEnoughTranscript.isDisplayed()) {
+      console.error(
+        "Recording failed: Please provide a proper medical conversation"
+      );
+    } else {
+      await waitForElement(this.SoapNoteBtn);
+      console.log("Recording successful: Transcript generated");
+    }
+    await waitForElement(QuickActions.quickActionButton);
+    await verifyAndClick(this.Transcript);
+    await verifyAndClick(this.Cdss);
+    await driver.pause(2000);
+    const elements =
+      this.SuggestedDiagnosisAndInterventions ||
+      this.SuggestedDiagnosticTesting ||
+      this.SuggestedMedications ||
+      this.SuggestedQuestions;
+
+    if (elements.isDisplayed()) {
+      console.log("CDSS is generated properly");
+    } else if (this.CDSSLimitExceded.isDisplayed()) {
+      console.error(
+        "\x1b[31m%s\x1b[0m",
+        "Kindly please verify the CDSS is off / your CDSS subscription is over"
+      );
+    }
+  }
+  async Transcript_Verification() {
+    await waitForElement(this.Transcript);
+    await driver.pause(3000);
+    await verifyAndClick(this.Transcript);
+    await this.dataScanning(this.cleanedTranscriptScroll);
+    await AudioManeger.TextComparison("english");
+    await verifyAndClick(this.originalTrnscript);
+    await verifyAndClick(this.claeanedTranscript);
+    await verifyAndClick(this.SoapNoteBtn);
+  }
+
+  async SOAPNote_Verification() {
+    await waitForElement(QuickActions.quickActionButton);
+    await validate(this.SoapNoteBtn);
+    await this.SoapNoteBtn.click();
+    await this.copyMailPrint();
+    await await driver.execute("mobile: swipe", { direction: "up" });
+    await driver.execute("mobile: swipe", { direction: "down" });
+    await driver.execute("mobile: swipe", { direction: "down" });
+    await validate(this.patientInformation);
+  }
+  get C_OK() {
+    return $("~OK");
+  }
+  async multiple_Conversation() {
+    await waitForElement(this.AddConversation);
+    await verifyAndClick(this.AddConversation);
+    await verifyAndClick(this.AddConversationNo);
+    await verifyAndClick(this.AddConversation);
+    await verifyAndClick(this.AddConversationConfirmationYes);
+    await verify(this.pauseBtn);
+    await this.recordAudioAndSaveAsDraft();
+    console.log(
+      "Here we are making the transcription as draft for verifying the flow of the draft trancript resuming and finalizing Encounter with a draft transcript."
+    );
+    await driver.pause(5000);
+    await LoginPage.restartApp();
+    await verifyAndClick(HomePage.encounter);
+    await driver.pause(5000);
+    await EncounterPage.clickDraftTranscript();
+    await driver.pause(5000);
+    await waitForElement(this.finaliseEncounter);
+    await verifyAndClick(this.finaliseEncounter);
+    await driver.pause(3000);
+    console.log(
+      "here we have verified that enounter will not be finalized consisting of draft transcript"
+    );
+    await verifyAndClick(this.C_OK);
+    await verifyAndClick(this.resumeConversationForMultipleConverstionScenario);
+    await verifyAndClick(
+      this.resumeConversationForMultipleConverstionScenarioYes
+    );
+    console.log(
+      "Here we are continueng our converstion  with a draft transcription"
+    );
+    await this.recordAudio();
+  }
+  async second_conversation_For_Existing_Patient() {
+    await waitForElement(this.AddConversation);
+    await verifyAndClick(this.AddConversation);
+    await verifyAndClick(this.AddConversationConfirmationYes);
+    await this.recordAudioForExicistingPatient();
+  }
+  async second_Conversations_For_New_Patient() {
+    await waitForElement(this.AddConversation);
+    await verifyAndClick(this.AddConversation);
+    await verifyAndClick(this.AddConversationConfirmationYes);
+    await this.recordAudio();
+  }
+  async third_Conversations_For_New_Patient() {
+    await waitForElement(this.AddConversation);
+    await verifyAndClick(this.AddConversation);
+    await verifyAndClick(this.AddConversationConfirmationYes);
+    await this.recordAudio();
+  }
+  async third_Conversation_For_Existing_Patient() {
+    await this.multiple_Conversation();
+    await verify(this.PrevEncounterRef);
+    await verifyAndClick(this.PrevEncounterRefNo);
+  }
+
+  async finalize_Encounter() {
+    await waitForElement(this.SoapNoteBtn);
+    await verifyAndClick(this.SoapNoteScreenTxtField);
+    await verifyAndClick(this.doneBtn);
+    await this.finaliseEncounter.click();
+    await this.finaliseEncounterOk.click();
+    await driver.pause(20000);
+    await LoginPage.restartApp();
+  }
+  async recordAudioAndSaveAsDraft() {
+    await AudioManeger.playAudio("english");
+    await driver.pause(30000);
+    await AudioManeger.stopAudio();
+    await driver.pause(3000);
+    await this.RecordingBack.click();
+    await verifyAndClick(this.saveAsDraftBtn);
+  }
+  async recordAudioForExicistingPatient() {
+    await this.recordAudio();
+    await verify(this.PrevEncounterRef);
+    await verifyAndClick(this.PrevEncounterRefNo);
+  }
+  async recordAudioForDraft() {
+    await this.resumeRecording.click();
+    await verifyAndClick(this.resumeRecordingConformationYes);
+    await this.recordAudio();
+  }
+  async startConversation() {
+    await verifyAndClick(this.acknowledgeCheckBox);
+    await verifyAndClick(this.startConversationBtn);
+  }
+  async sleepModeConformation() {
+    await driver.activateApp("com.thinkhat.heynoki");
+    await HomePage.encounter.click();
+    await verifyAndClick(EncounterPage.Draft);
+    try {
+      await verify(this.SoapNoteBtn);
+    } catch (error) {
+      console.error(
+        "the soap note is not yet realy displayed or somthing unexpected happened"
+      );
+    }
+  }
+  async copyMailPrint() {
+    await verifyAndClick(this.copyBtn);
+    await verifyAndClick(this.mailBtn);
+    await verifyAndClick(this.emailSentOk);
+    await verifyAndClick(this.printBtn);
+    await verify(this.printDownload);
+    await driver.pause(5000);
+    await verifyAndClick(this.printPageCancel);
+    await verifyAndClick(this.printPageBackBtn);
+  }
+
+  async recordAudioforOfflineMode() {
+    await AudioManeger.playAudio("english");
+    console.log("Audio started:", AudioManeger.currentAudioFile);
+    await this.recordAudioforOfflineModeMT();
+    await driver.pause(5000);
+    await verifyAndClick(this.pauseBtn);
+    await AudioManeger.pauseAudio();
+    console.log("Audio paused at:", AudioManeger.pausedTime, "seconds");
+    await driver.pause(5000);
+    await this.playBtn.click();
+    await AudioManeger.resumeAudio(); //correct
+    console.log("Audio resumed:", AudioManeger.currentAudioFile);
+    await driver.pause(30000); //aagain playing audio for 1 min in online
+    await AudioManeger.pauseAudio();
+    await driver.pause(2000);
+
+    await aeroplaneModeOn();
+
+    await driver.pause(5000);
+    await AudioManeger.pauseAudio();
+    await driver.terminateApp("com.thinkhat.nokiTest"); // step verifying the app screen to be in recording screen only even in offline
+    await driver.pause(10000);
+    await driver.activateApp("com.thinkhat.nokiTest");
+    await waitForElement(this.ContinueBtn);
+    await verifyAndClick(this.ContinueBtn);
+    console.log(
+      "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
+    );
+    await AudioManeger.resumeAudio();
+    await driver.pause(60000);
+    await AudioManeger.stopAudio();
+    await verifyAndClick(this.stopBtn);
+    console.log(
+      "here after app got closed while recording we magaing automatically again resumed the audio"
+    );
+    await driver.pause(5000);
+    await verify(this.offlineConversationSaved);
+
+    await driver
+      .action("pointer")
+      .move({ duration: 0, x: 355, y: 22 })
+      .down({ button: 0 })
+      .move({ duration: 1000, x: 354, y: 720 })
+      .up({ button: 0 })
+      .perform();
+    const airplaneModeBtn = await $("~com.apple.ControlCenter.Airplane");
+    await (await airplaneModeBtn).click();
+
+    await driver
+      .action("pointer")
+      .move({ duration: 0, x: 283, y: 790 })
+      .down({ button: 0 })
+      .pause(50)
+      .up({ button: 0 })
+      .perform(); // device come to online
+    await driver.pause(5000);
+    console.log(
+      "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved"
+    );
+  }
+  async recordAudioforOfflineForExistingPatient() {
+    await this.recordAudioforOfflineMode();
+    await waitForElement(this.PrevEncounterRefNo);
+    await verifyAndClick(this.PrevEncounterRefNo);
+  }
+
+  async recordAudioforOfflineModeMT() {
+    let timesToRun = 2;
+    let count = 0;
+    console.log(`Loop will run ${timesToRun} times`);
+    for (let i = 0; i < timesToRun; i++) {
+      await driver.pause(10000);
+      await aeroplaneModeOn();
+      await driver.pause(10000);
+      allureRepoter.startStep("Verifying Offline Mode Transcription");
+      await verify(this.offlineModeRTranscription);
+      allureRepoter.endStep("passed");
+      await driver.pause(5000);
+      await aeroplaneModeOff();
+      await driver.pause(5000);
+      allureRepoter.startStep("Verifying Live Transcription");
+      await LiveTranscript();
+      allureRepoter.endStep("passed");
+      count++;
+      console.log(`Offline Mode Loop we are Running Now  ${i + 1} completed`);
+    }
+  }
+
+  async dataScanning(
+    scrollableElement,
+    {
+      textSelector = "//XCUIElementTypeTextView", // element type to capture
+      pauseTime = 500, // wait time after swipe
+    } = {}
+  ) {
+    const allTexts = new Set();
+    const element = await scrollableElement;
+    let scrollCount = 0;
+
+    while (true) {
+      let newTextsAdded = 0;
+
+      const textViews = await $$(textSelector);
+      for (const textView of textViews) {
+        const text = await textView.getText();
+        if (text && !allTexts.has(text)) {
+          allTexts.add(text);
+          newTextsAdded++;
+        }
+      }
+
+      if (newTextsAdded === 0) {
+        console.log(
+          `Stopping — no new texts found after swipe ${scrollCount}.`
+        );
+        break;
+      }
+
+      scrollCount++;
+      console.log(
+        `Swipe ${scrollCount}, new: ${newTextsAdded}, total: ${allTexts.size}`
+      );
+      await swipe("up", element);
+      await driver.pause(pauseTime);
+    }
+
+    const outputFile = path.resolve(
+      `/Users/nagasubarayudu/Desktop/IOS/_results_/TreascriptFiles/scanned_texts_${Date.now()}.txt`
+    );
+
+    fs.mkdirSync(path.dirname(outputFile), { recursive: true });
+    fs.writeFileSync(outputFile, [...allTexts].join("\n"), "utf-8");
+    console.log(`✅ Texts saved to ${outputFile}`);
+
+    return outputFile;
+  }
+  // get bloodGroup() {
+  //   return $(
+  //     '//XCUIElementTypeStaticText[@name="main label" and @label="BloodGroup"]'
+  //   );
+  // }
+  async bloodName(name) {
+    return await waitForElement($(`~${name}`));
+  }
+  get title() {
+    return $('//XCUIElementTypeTextView[@value="Title"]');
+  }
+  get titleTextField() {
+    return $(
+      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[1]'
+    );
+  }
+  get Discription() {
+    return $('(//XCUIElementTypeTextView[@value="Description"])[1]');
+  }
+  get discriptionTextField() {
+    return $(
+      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[2]'
+    );
+  }
+  async UpdatePatientInfo() {
+    await waitForElement(this.update);
+    await this.update.click();
+    await this.AddPatientInformation.click();
+    await verifyAndClick(this.title);
+    await this.titleTextField.setValue("Blood Group");
+    await verifyAndClick(this.Discription);
+    await this.discriptionTextField.setValue("O positive");
+    await verifyAndClick(this.add);
+    await verifyAndClick(this.save);
+    await waitForElement(this.C_OK);
+    await verifyAndClick(this.C_OK);
+    await this.bloodGroup("Blood Group");
+    await this.bloodName("O positive");
+  }
+  get SoapNoteScreenTxtField() {
+    return $(
+      '//XCUIElementTypeTextView[@value="Click on the mic and start speaking.."]'
+    );
+  }
+  get SoapNoteScreenTxtFieldEntry() {
+    return $(
+      '//XCUIElementTypeApplication[@name="Noki-T"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther/XCUIElementTypeTextView"]'
+    );
+  }
+
+  async manualUpdate() {
+    await waitForElement(this.SoapNoteScreenTxtField);
+    await verifyAndClick(this.SoapNoteScreenTxtField);
+    await this.SoapNoteScreenTxtFieldEntry.setValue("Blood Group O negitive");
+    await verifyAndClick(this.doneBtn);
+    await verifyAndClick(this.send);
+    await waitForElement(this.C_OK);
+    await verifyAndClick(this.C_OK);
+    await this.bloodGroup("Blood Group");
+    await this.bloodName("O negitive");
+  }
+  async hayNoki() {
+    await waitForElement(this.Mic);
+    await verifyAndClick(this.Mic);
+    await driver.pause(2000);
+    await playTTS("Blood group is B negative", "Alex", 1.1);
+    await driver.pause(2000);
+    await verifyAndClick(this.MicStop);
+    await driver.pause(3000);
+    await verifyAndClick(this.send);
+    await waitForElement(this.C_OK);
+    await verifyAndClick(this.C_OK);
+    await this.bloodGroup("Blood Group");
+    await this.bloodName("B negative");
+  }
+}
+
+export default new RecordingPage();

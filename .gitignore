@@ -1,0 +1,15 @@
+node_modules
+.env.prod
+.env.test
+_results_
+allure-results
+allure-report
+
+qa-reportsNokiIOS
+.env
+.eslintrc
+package-lock.json
+node_modules
+utils/
+.DS_Store
+
