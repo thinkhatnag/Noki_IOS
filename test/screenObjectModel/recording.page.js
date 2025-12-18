@@ -7,7 +7,6 @@ import {
   aeroplaneModeOff,
   LiveTranscript,
   playTTS,
-  validate,
 } from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
 import LoginPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page.js";
 import EncounterPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/encounter.page.js";
@@ -315,10 +314,8 @@ class RecordingPage {
       `//XCUIElementTypeStaticText[@name="We’ve saved your conversation. It’ll sync when you’re connected again."]`
     );
   }
-    get endEncounter() {
-    return $(
-      `//XCUIElementTypeStaticText[@name="End Encounter"]`
-    );
+  get endEncounter() {
+    return $(`//XCUIElementTypeStaticText[@name="End Encounter"]`);
   }
 
   get mailBtn() {
@@ -468,6 +465,11 @@ class RecordingPage {
   get acknowledgeCheckBox() {
     return $("~square");
   }
+  get acknowledgeAndContinue() {
+    return $(
+      '-ios class chain:**/XCUIElementTypeButton[`name == "Acknowledge & Continue"`]'
+    );
+  }
   get networkFailureOk() {
     return $('(//XCUIElementTypeButton[@name="Close"])[2]');
   }
@@ -486,7 +488,7 @@ class RecordingPage {
   }
   async recordAudio() {
     await this.Audio();
-    await this.stopBtn.click();
+    await verifyAndClick(this.stopBtn);
   }
   async CDSS_Verification() {
     if (await this.notEnoughTranscript.isDisplayed()) {
@@ -520,22 +522,21 @@ class RecordingPage {
     await waitForElement(this.Transcript);
     await driver.pause(3000);
     await verifyAndClick(this.Transcript);
-    await this.dataScanning(this.cleanedTranscriptScroll);
+    await this.dataScaning(this.cleanedTranscriptScroll);
     await AudioManeger.TextComparison("english");
     await verifyAndClick(this.originalTrnscript);
     await verifyAndClick(this.claeanedTranscript);
-    await verifyAndClick(this.SoapNoteBtn);
   }
 
   async SOAPNote_Verification() {
     await waitForElement(QuickActions.quickActionButton);
-    await validate(this.SoapNoteBtn);
-    await this.SoapNoteBtn.click();
+    await verify(this.SoapNoteBtn);
+    await verifyAndClick(this.SoapNoteBtn);
     await this.copyMailPrint();
     await await driver.execute("mobile: swipe", { direction: "up" });
     await driver.execute("mobile: swipe", { direction: "down" });
     await driver.execute("mobile: swipe", { direction: "down" });
-    await validate(this.patientInformation);
+    await verify(this.patientInformation);
   }
   get C_OK() {
     return $("~OK");
@@ -551,12 +552,12 @@ class RecordingPage {
     console.log(
       "Here we are making the transcription as draft for verifying the flow of the draft trancript resuming and finalizing Encounter with a draft transcript."
     );
-    await driver.pause(5000);
+    await driver.pause(3000);
     await LoginPage.restartApp();
+    await waitForElement(HomePage.encounter);
     await verifyAndClick(HomePage.encounter);
-    await driver.pause(5000);
+    await driver.pause(3000);
     await EncounterPage.clickDraftTranscript();
-    await driver.pause(5000);
     await waitForElement(this.finaliseEncounter);
     await verifyAndClick(this.finaliseEncounter);
     await driver.pause(3000);
@@ -601,17 +602,16 @@ class RecordingPage {
     await waitForElement(this.SoapNoteBtn);
     await verifyAndClick(this.SoapNoteScreenTxtField);
     await verifyAndClick(this.doneBtn);
-    await this.finaliseEncounter.click();
-    await this.finaliseEncounterOk.click();
+    await verifyAndClick(this.finaliseEncounter);
+    await verifyAndClick(this.finaliseEncounterOk);
     await driver.pause(20000);
-    await LoginPage.restartApp();
   }
   async recordAudioAndSaveAsDraft() {
     await AudioManeger.playAudio("english");
     await driver.pause(30000);
     await AudioManeger.stopAudio();
     await driver.pause(3000);
-    await this.RecordingBack.click();
+    await verifyAndClick(this.RecordingBack);
     await verifyAndClick(this.saveAsDraftBtn);
   }
   async recordAudioForExicistingPatient() {
@@ -620,17 +620,17 @@ class RecordingPage {
     await verifyAndClick(this.PrevEncounterRefNo);
   }
   async recordAudioForDraft() {
-    await this.resumeRecording.click();
+    await verifyAndClick(this.resumeRecording);
     await verifyAndClick(this.resumeRecordingConformationYes);
     await this.recordAudio();
   }
   async startConversation() {
-    await verifyAndClick(this.acknowledgeCheckBox);
     await verifyAndClick(this.startConversationBtn);
+    await verifyAndClick(this.acknowledgeAndContinue);
   }
   async sleepModeConformation() {
     await driver.activateApp("com.thinkhat.heynoki");
-    await HomePage.encounter.click();
+    await verifyAndClick(HomePage.encounter);
     await verifyAndClick(EncounterPage.Draft);
     try {
       await verify(this.SoapNoteBtn);
@@ -660,7 +660,7 @@ class RecordingPage {
     await AudioManeger.pauseAudio();
     console.log("Audio paused at:", AudioManeger.pausedTime, "seconds");
     await driver.pause(5000);
-    await this.playBtn.click();
+    await verifyAndClick(this.playBtn);
     await AudioManeger.resumeAudio(); //correct
     console.log("Audio resumed:", AudioManeger.currentAudioFile);
     await driver.pause(30000); //aagain playing audio for 1 min in online
@@ -697,7 +697,7 @@ class RecordingPage {
       .up({ button: 0 })
       .perform();
     const airplaneModeBtn = await $("~com.apple.ControlCenter.Airplane");
-    await (await airplaneModeBtn).click();
+    await verifyAndClick(airplaneModeBtn);
 
     await driver
       .action("pointer")
@@ -725,73 +725,89 @@ class RecordingPage {
       await driver.pause(10000);
       await aeroplaneModeOn();
       await driver.pause(10000);
-      allureRepoter.startStep("Verifying Offline Mode Transcription");
       await verify(this.offlineModeRTranscription);
-      allureRepoter.endStep("passed");
       await driver.pause(5000);
       await aeroplaneModeOff();
       await driver.pause(5000);
-      allureRepoter.startStep("Verifying Live Transcription");
-      await LiveTranscript();
-      allureRepoter.endStep("passed");
-      count++;
-      console.log(`Offline Mode Loop we are Running Now  ${i + 1} completed`);
     }
   }
+  async dataScaning(scrollablelement) {
+    const allScannedTexts = [];
 
-  async dataScanning(
-    scrollableElement,
-    {
-      textSelector = "//XCUIElementTypeTextView", // element type to capture
-      pauseTime = 500, // wait time after swipe
-    } = {}
-  ) {
-    const allTexts = new Set();
-    const element = await scrollableElement;
-    let scrollCount = 0;
+    // ✅ Two possible stop markers
+    const stopMarkers = ["--- Conversación 2 ---", "--Conversation 2 --"];
 
-    while (true) {
-      let newTextsAdded = 0;
+    // 1️⃣ Scan all visible text views
+    const textViews = await $$("//XCUIElementTypeTextView");
 
-      const textViews = await $$(textSelector);
-      for (const textView of textViews) {
-        const text = await textView.getText();
-        if (text && !allTexts.has(text)) {
-          allTexts.add(text);
-          newTextsAdded++;
-        }
+    for (const textView of textViews) {
+      const text = await textView.getText();
+      if (text) {
+        allScannedTexts.push(text.trim());
       }
+    }
 
-      if (newTextsAdded === 0) {
-        console.log(
-          `Stopping — no new texts found after swipe ${scrollCount}.`
-        );
-        break;
+    // Combine all text blocks into a single string
+    const combinedText = allScannedTexts.join("\n");
+    let textToSave = combinedText;
+
+    // 2️⃣ Find the first occurrence of any stop marker (case-insensitive)
+    let firstMarkerIndex = -1;
+    for (const marker of stopMarkers) {
+      const index = combinedText.toLowerCase().indexOf(marker.toLowerCase());
+      if (
+        index !== -1 &&
+        (firstMarkerIndex === -1 || index < firstMarkerIndex)
+      ) {
+        firstMarkerIndex = index;
       }
+    }
 
-      scrollCount++;
+    // 3️⃣ Cut text at the first found marker (if any)
+    if (firstMarkerIndex !== -1) {
+      textToSave = combinedText.substring(0, firstMarkerIndex).trim();
       console.log(
-        `Swipe ${scrollCount}, new: ${newTextsAdded}, total: ${allTexts.size}`
+        `🛑 Found stop marker at index ${firstMarkerIndex}. Saving only text BEFORE it.`
       );
-      await swipe("up", element);
-      await driver.pause(pauseTime);
+    } else {
+      console.log(`✅ No stop markers found. Saving ALL scanned content.`);
     }
 
-    const outputFile = path.resolve(
-      `/Users/nagasubarayudu/Desktop/IOS/_results_/TreascriptFiles/scanned_texts_${Date.now()}.txt`
-    );
+    // 4️⃣ Split into lines and remove empty lines
+const seen = new Set();
+const finalContentArray = [];
 
-    fs.mkdirSync(path.dirname(outputFile), { recursive: true });
-    fs.writeFileSync(outputFile, [...allTexts].join("\n"), "utf-8");
-    console.log(`✅ Texts saved to ${outputFile}`);
+textToSave
+  .split("\n")
+  .map(line => line.trim())
+  .filter(line => line.length > 0)
+  .forEach(line => {
+    if (!seen.has(line)) {
+      seen.add(line);           // keep FIRST occurrence
+      finalContentArray.push(line);
+    }
+  });
 
-    return outputFile;
+    // 5️⃣ Save to file
+    const dirPath = "./_results_";
+    const filePath = path.join(dirPath, `scanned_texts_${Date.now()}.txt`);
+
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    fs.writeFileSync(filePath, finalContentArray.join("\n"), "utf-8");
+
+    console.log(`✅ Saved ${finalContentArray.length} lines to: ${filePath}`);
+    return finalContentArray;
   }
-  // get bloodGroup() {
-  //   return $(
-  //     '//XCUIElementTypeStaticText[@name="main label" and @label="BloodGroup"]'
-  //   );
-  // }
+
+  async bloodGroup(name) {
+    return $(
+      `//XCUIElementTypeStaticText[@name="main label" and @label="${name}"]`
+    );
+  }
+
   async bloodName(name) {
     return await waitForElement($(`~${name}`));
   }
@@ -800,7 +816,7 @@ class RecordingPage {
   }
   get titleTextField() {
     return $(
-      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[1]'
+      '-ios class chain:**/XCUIElementTypeOther[`name == "Stack view"`]/XCUIElementTypeOther[7]/XCUIElementTypeOther/XCUIElementTypeTextView[1]'
     );
   }
   get Discription() {
@@ -808,13 +824,13 @@ class RecordingPage {
   }
   get discriptionTextField() {
     return $(
-      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[2]'
+      '-ios class chain:**/XCUIElementTypeOther[`name == "Stack view"`]/XCUIElementTypeOther[7]/XCUIElementTypeOther/XCUIElementTypeTextView[2]'
     );
   }
   async UpdatePatientInfo() {
     await waitForElement(this.update);
-    await this.update.click();
-    await this.AddPatientInformation.click();
+    await verifyAndClick(this.update);
+    await verifyAndClick(this.AddPatientInformation);
     await verifyAndClick(this.title);
     await this.titleTextField.setValue("Blood Group");
     await verifyAndClick(this.Discription);
@@ -833,7 +849,7 @@ class RecordingPage {
   }
   get SoapNoteScreenTxtFieldEntry() {
     return $(
-      '//XCUIElementTypeApplication[@name="Noki-T"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther/XCUIElementTypeTextView"]'
+      "-ios class chain:**/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther"
     );
   }
 

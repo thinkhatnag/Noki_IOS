@@ -3,31 +3,28 @@ import { verify, verifyAndClick } from "../../../helpers/helper.js";
 import SpanishLanguage from "../../screenObjectModel/spanishLanguage.js";
 import allureReporter from "@wdio/allure-reporter";
 
-describe("Spanish", () => {
   beforeEach(() => {
-    allureReporter.addEpic("NOKI IOS Automation");
-    allureReporter.addOwner("Mobile Team");
-    allureReporter.addParentSuite("Spanish");
+    allureReporter.addSubSuite("Forgot Password")
   });
   beforeEach(async () => {
     await LoginPage.restartApp();
   });
 
-  it("", async () => {
+  it("Forgot PassWord UI verification -Es", async () => {
     await verifyAndClick(SpanishLanguage.forgotPassword);
     await verify(SpanishLanguage.forgotPasswordEmailField);
     await verify(SpanishLanguage.sendResetLinkBtn);
     await verify(SpanishLanguage.loginLink);
   });
 
-  it("", async () => {
+  it("Verify Error message when unrigistered mail is Entered -Es", async () => {
     await LoginPage.restartApp();
     await verifyAndClick(SpanishLanguage.forgotPassword);
     await SpanishLanguage.enterForgotPasswordEmail("nag.subbarayudu@gmail.com");
     await verify(SpanishLanguage.emailNotRegisteredError);
     await verifyAndClick(SpanishLanguage.loginLink);
   });
-  it("", async () => {
+  it("Verify Error message when Invalid mail is Entered -Es", async () => {
     await LoginPage.restartApp();
     await verifyAndClick(SpanishLanguage.forgotPassword);
     await SpanishLanguage.enterForgotPasswordEmail("bheema.badri@");
@@ -35,7 +32,7 @@ describe("Spanish", () => {
     await verifyAndClick(SpanishLanguage.loginLink);
   });
 
-  it("", async () => {
+  it("Verify Error message when mail is not Entered -Es", async () => {
     await LoginPage.restartApp();
     await verifyAndClick(SpanishLanguage.forgotPassword);
     await SpanishLanguage.enterForgotPasswordEmail("  ");
@@ -43,11 +40,11 @@ describe("Spanish", () => {
     await verifyAndClick(SpanishLanguage.loginLink);
   });
 
-  it.skip("", async () => {
+  it("Verify Rest Password mail generation -Es", async () => {
     await LoginPage.restartApp();
     await verifyAndClick(SpanishLanguage.forgotPassword);
     await SpanishLanguage.enterForgotPasswordEmail(process.env.Email);
     await verify(SpanishLanguage.successMessageForResetLink);
     await verifyAndClick(SpanishLanguage.continueToLogin);
   });
-});
+

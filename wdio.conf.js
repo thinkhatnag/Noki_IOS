@@ -5,7 +5,7 @@ const { removeSync } = fsExtra; // Destructure removeSync
 import { exec } from "child_process";
 import allureReporter from "@wdio/allure-reporter";
 import dotenv from "dotenv";
-import { getEnvironmentData } from "worker_threads";
+// import { getEnvironmentData } from "worker_threads";
 
 const env = process.env.TEST_ENV; // must be set via bash command
 dotenv.config({ path: `.env.${env}` });
@@ -41,20 +41,18 @@ export const config = {
   // of the config file unless it's absolute.
   //
   specs: [
-    //  './test/spec/English/Forgot_Password.spec.js',
-    // './test/spec/English/Login.spec.js',
-    // './test/spec/English/home.spec.js',
-    // './test/spec/English/setting.spec.js',
-    // './test/spec/English/Existing_Patient.spec.js',
-    //  './test/spec/English/New_Patient.spec.js',
-
+    // './test/spec/English/Forgot_Password.spec.js',
+    // "./test/spec/English/Login.spec.js",
+    // "./test/spec/English/home.spec.js",
+    // "./test/spec/English/Setting.spec.js",
+    // "./test/spec/English/New_Patient.spec.js",
+    // "./test/spec/English/Existing_Patient.spec.js",
     // './test/spec/Spanish/Forgot_Password_ES.spec.js',
-    // './test/spec/Spanish/Login_Es.spec.js',
-    // './test/spec/Spanish/Settings_ES.spec.js',
-    // './test/spec/Spanish/Existing_Patient_ES.spec.js',
-    // './test/spec/Spanish/New_Patient_ES.spec.js',
-    './test/spec/Test.spec.js',
-    
+    // "./test/spec/Spanish/Login_Es.spec.js",
+    // "./test/spec/Spanish/Settings_ES.spec.js",
+    // "./test/spec/Spanish/New_Patient_ES.spec.js",
+    "./test/spec/Spanish/Existing_Patient_ES.spec.js",
+    // './test/spec/Test.spec.js',
   ],
   // Patterns to exclude.
   exclude: [
@@ -92,10 +90,9 @@ export const config = {
       //"deviceName": "iPhone 15 Pro Max",
       "appium:deviceName": "iPhone 16",
       //"deviceName": "iPad (5th generation)",
-      "appium:platformVersion": "18.6.2",
+      "appium:platformVersion": "18.7.2",
       // "deviceName": "iPhone 12",\
       "appium:automationName": "XCUITest",
-      // "wdaLocalPort": 8100,
       "appium:noReset": true,
       "appium:fullReset": false,
       "appium:showXcodeLog": true,
@@ -103,15 +100,16 @@ export const config = {
       "appium:newCommandTimeout": 240000,
       "appium:connectionTimeout": 180000,
       "appium:sessionOverride": true,
-      // "appium:autoAcceptAlerts": true,
-      //"forceAppLaunch":true,
-      //"bundleId": "com.thinkhat.devNoki",
       "appium:udid": "00008140-00054922012B001C", //Iphone 16
       //"udid": "00008101-00041921212B001E",//Iphone 12
       //"udid": "00008130-0018755202F0001C",//Iphone 15 Pro Max
       //"udid": "BEAE10F4-8353-4B1C-B2D2-8E0C9D2F5DC1",//simulator
       //"udid": "00008110-000165DE22E9801E",//Iphone 13 Pro Max
+      // "appium:autoAcceptAlerts": true,
+      "appium:udid:forceAppLaunch": true,
+      "appium:udid: bundleId": process.env.BUNDLE_ID,
 
+      //"bundleId": "com.thinkhat.devNoki",
       //"connectHardwareKeyboard": true,
       // "appium:AcceptAlerts": true
     },
@@ -216,16 +214,14 @@ export const config = {
         disableWebdriverScreenshotsReporting: false,
         reportedEnvironmentVars: {
           Environment: process.env.Environment,
-          device_name: process.env.Device_Name ,
-          platform_name: process.env.Platform_Name ,
+          device_name: process.env.Device_Name,
+          platform_name: process.env.Platform_Name,
           platform_version: process.env.Platform_Version,
-          app_version: process.env.App_Version ,
+          app_version: process.env.App_Version,
           automation_engine: process.env.Automation_Engine,
         },
       },
     ],
-
-    
   ],
 
   // Options to be passed to Mocha.
@@ -307,22 +303,37 @@ export const config = {
   /**
    * Function to be executed before a test (in Mocha/Jasmine) starts.
    */
+
   beforeTest(test) {
-    // parent and suite can be set here or inside your test file
-   
+    const title = test.title.toLowerCase();
 
-    // Segrigate Positive or Negative automatically
-    const name = test.title.toLowerCase();
+    // ---------- LANGUAGE ----------
+    const language = title.includes("-es") ? "Spanish" : "English";
 
-    const negativeWords = ['error', 'fail', 'invalid', 'empty', 'expired', 'wrong'];
-    const isNegative = negativeWords.some(word => name.includes(word));
+    // ---------- POSITIVE / NEGATIVE (classification only) ----------
+    const negativeWords = [
+      "error",
+      "fail",
+      "offline",
+      "invalid",
+      "denied",
+      "killed",
+      "timeout",
+    ];
 
-    if (isNegative) {
-      allureReporter.addSubSuite('Negative');
-    } else {
-      allureReporter.addSubSuite('Positive');
-    }
+    const type = negativeWords.some((w) => title.includes(w))
+      ? "Negative"
+      : "Positive";
+
+    // ---------- ALLURE STRUCTURE ----------
+    allureReporter.addEpic("Noki iOS Mobile"); // Application
+    allureReporter.addParentSuite(language); // English / Spanish
+
+    // ---------- FILTER LABELS ----------
+    allureReporter.addLabel("language", language);
+    allureReporter.addLabel("type", type);
   },
+
   /**
    * Hook that gets executed _before_ a hook within the suite starts (e.g. runs before calling
    * beforeEach in Mocha)
@@ -345,12 +356,8 @@ export const config = {
    * @param {boolean} result.passed    true if test has passed, otherwise false
    * @param {object}  result.retries   information about spec related retries, e.g. `{ attempts: 0, limit: 0 }`
    */
-  afterTest: async function (
-    test,
-    context,
-    { error, result, duration, passed, retries,  }
-  ) {
-    if (passed || error || result || !passed) {
+  afterTest: async function (test, context, { error, passed }) {
+    if (!passed) {
       const screenshot = await browser.takeScreenshot();
       allureReporter.addAttachment(
         "Screenshot on Failure",

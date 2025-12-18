@@ -1,34 +1,31 @@
-import HomePage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/home.page.js';
-import PatientsPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/patients.page.js';
-import EncounterPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/encounter.page.js';
-import SettingsPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/setting.page.js';
-import SearchPatientPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/searchPatient.page.js';
-import RecordingPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/recording.page.js';
-import AddPatientPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/addPatient.page.js';
-import { verify,  verifyAndClick  } from '/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js';
-import LoginPage from '/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page'
-describe("English", () => {
-    beforeEach(() => {
-      allureReporter.addEpic("NOKI IOS Automation");
-      allureReporter.addOwner("Mobile Team");
-      allureReporter.addParentSuite("English");
-    });
-    describe("Existing Patient", () => {
-      beforeEach(() => {
-        allureReporter.addSuite("Existing Patient");
-      });
-  
-    it('Verify all tab bar elements are working correctly {TC11}', async() => {
-        await HomePage.patients.click();
-        await verify(PatientsPage.patientSearch)
-        await verifyAndClick(HomePage.encounter)
-        await verify(EncounterPage.Encounter)
-        await verifyAndClick(HomePage.settings)
-        await verify(SettingsPage.profileSettings)
-        await LoginPage.restartApp()
-    });
-})
-})
+import HomePage from "../../screenObjectModel/home.page.js";
+import PatientsPage from "../../screenObjectModel/patients.page.js";
+import EncounterPage from "../../screenObjectModel/encounter.page.js";
+import SettingsPage from "../../screenObjectModel/setting.page.js";
+import SearchPatientPage from "../../screenObjectModel/searchPatient.page.js";
+import RecordingPage from "../../screenObjectModel/recording.page.js";
+import AddPatientPage from "../../screenObjectModel/addPatient.page.js";
+import { verify, verifyAndClick } from "../../../helpers/helper.js";
+import LoginPage from "../../screenObjectModel/login.page.js";
+import allureReporter from "@wdio/allure-reporter";
+  before(() => {
+    allureReporter.addEpic("NOKI IOS Automation");
+    allureReporter.addOwner("Mobile Team");
+    allureReporter.addParentSuite('English')
+    allureReporter.addSubSuite('Home Navigation')
+  });
+
+  it("Verify all tab bar elements are working correctly {TC11}", async () => {
+    await HomePage.patients.click();
+    await verify(PatientsPage.patientSearch);
+    await verifyAndClick(HomePage.encounter);
+    await verify(EncounterPage.Encounter);
+    await verifyAndClick(HomePage.settings);
+    await verify(SettingsPage.profileSettings);
+    await LoginPage.restartApp();
+  });
+
+
 //     it('Verify the audio recording process {TC12}', async() => {
 //         await HomePage.startNewEncounterButton.click();
 //        await SearchPatientPage.patientSearch('Naga')
@@ -50,8 +47,6 @@ describe("English", () => {
 //         await LoginPage.restartApp()
 //     });
 // })
-
-
 
 // await this.quickActions.click()
 // await this.regenerateIcdAndCptCodes.click()
@@ -85,4 +80,3 @@ describe("English", () => {
 // await waitForElement(this.referalLetter)
 //         await RecordingPage.copyMailPrint()
 // await driver.execute('mobile: swipe', { direction: 'up' });
-

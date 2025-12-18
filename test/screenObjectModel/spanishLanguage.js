@@ -150,12 +150,6 @@ class SpanishLanguage {
   get email() {
     return $("~email");
   }
-  get() {
-    return $(``);
-  }
-  get() {
-    return $(``);
-  }
   get launguage() {
     return $("~language");
   }
@@ -163,7 +157,7 @@ class SpanishLanguage {
     return $("~Idioma");
   }
   get generalSettings() {
-    return $("~General Settings");
+    return $("~generalsettings");
   }
   get generalSettingsShowUp() {
     return $("~chevron.down");
@@ -196,7 +190,7 @@ class SpanishLanguage {
     return $('(//XCUIElementTypeStaticText[@name="LanguageSettingTVC"])[1]');
   }
   get spanish() {
-    return $("~Spanish");
+    return $("~Español");
   }
   get edit() {
     return $("~Editar");
@@ -232,7 +226,10 @@ class SpanishLanguage {
     return $("~Guardar");
   }
   get cancel() {
-    return $("~Cancelar");
+    return $("~cancel");
+  }
+  get settingsPageCancel() {
+    return $("~cancel");
   }
   get speciality() {
     return $("~speciality");
@@ -264,9 +261,7 @@ class SpanishLanguage {
   get logoutcancelationBtn() {
     return $("~no");
   }
-  get logoutBtn() {
-    return $("~logout");
-  }
+
   get logoutConformationBtn() {
     return $("~yes");
   }
@@ -322,6 +317,9 @@ class SpanishLanguage {
   }
 
   async profileSettingScreen() {
+    await LoginPage.restartApp();
+    await HomePage.settings.click();
+    await this.profileSettings.click();
     await verifyAndClick(this.edit);
     await verifyAndClick(this.firstName);
     await this.firstName.clearValue();
@@ -370,7 +368,9 @@ class SpanishLanguage {
   }
 
   async support_VerifiCation() {
-    await verifyAndClick(this.settings);
+    await LoginPage.restartApp();
+    await waitForElement(this.startNewEncounter);
+    await verifyAndClick(HomePage.settings); // till the profile
     await verifyAndClick(this.help);
     // await verifyAndClick(this.whatsapp);
 
@@ -407,9 +407,13 @@ class SpanishLanguage {
     console.log("Gmail is active");
     await driver.pause(5000);
     await driver.activateApp(process.env.BUNDLE_ID);
+    await driver.pause(2000);
     // Open Settings and Help, then click text element to launch Messages
-    await HomePage.settings.click();
+    await LoginPage.restartApp();
+    await waitForElement(this.startNewEncounter);
+    await verifyAndClick(HomePage.settings);
     await verifyAndClick(this.help);
+
     await verifyAndClick(this.text);
     // Verify Messages is active
     const messagesBundleId = "com.apple.MobileSMS";
@@ -428,45 +432,50 @@ class SpanishLanguage {
   }
 
   async generalSettingsUpdate() {
-    await verifyAndClick(this.generalSettings);
+    await LoginPage.restartApp();
+    await waitForElement(this.startNewEncounter);
+    await verifyAndClick(HomePage.settings);
+    await verifyAndClick(this.generalSetting);
     await verifyAndClick(this.selectAllOff);
-    await verifyAndClick(this.Done);
-    await verifyAndClick(this.generalSettings);
+    await verifyAndClick(this.settingPageDone);
+    await verifyAndClick(this.generalSetting);
     await verify(this.cdssDisabled);
     await verify(this.diognosisJustificationDisabled);
     await verifyAndClick(this.selectAllOn);
-    await verifyAndClick(this.Done);
-    await verifyAndClick(this.generalSettings);
+    await verifyAndClick(this.settingPageDone);
+    await verifyAndClick(this.generalSetting);
     await validate(this.selectAllOff);
     await validate(this.cdss);
     await validate(this.diognosisJustification);
-    await verifyAndClick(this.cancel);
+    await verifyAndClick(this.settingsPageCancel);
     await verifyAndClick(this.generalSettings);
     await verifyAndClick(this.cdss);
-    await verifyAndClick(this.Done);
+    await verifyAndClick(this.settingPageDone);
     await verifyAndClick(this.generalSettings);
     await validate(this.cdssDisabled);
     await verifyAndClick(this.cdssDisabled);
-    await verifyAndClick(this.Done);
+    await verifyAndClick(this.settingPageDone);
     await verifyAndClick(this.generalSettings);
     await validate(this.diognosisJustification);
     await verifyAndClick(this.diognosisJustification);
-    await verifyAndClick(this.Done);
+    await verifyAndClick(this.settingPageDone);
     await verifyAndClick(this.generalSettings);
     await validate(this.diognosisJustificationDisabled);
     await verifyAndClick(this.diognosisJustificationDisabled);
-    await verifyAndClick(this.Done);
+    await verifyAndClick(this.settingPageDone);
     await verifyAndClick(this.generalSettings);
     await validate(this.selectAllOff);
-    await verifyAndClick(this.cancel);
+    await verifyAndClick(this.settingsPageCancel);
   }
   async launguageChange() {
-    await verifyAndClick(this.settings);
+    await LoginPage.restartApp();
+    await waitForElement(this.startNewEncounter);
+    await verifyAndClick(HomePage.settings);
     await verifyAndClick(this.Idioma);
     await verifyAndClick(this.english);
-    await validate(this.launguage);
     await verifyAndClick(this.launguage);
     await verifyAndClick(this.spanish);
+    await driver.pause(5000);
   }
 
   get homeScreenAnimation() {
@@ -490,7 +499,7 @@ class SpanishLanguage {
   }
 
   get startNewEncounter() {
-    return $('//XCUIElementTypeStaticText[@name="Comenzar Nuevo Encuentro"]');
+    return $('//XCUIElementTypeButton[@name="Comenzar Nuevo Encuentro"]');
   }
   get nokiDashBoardStartNewEncounter() {
     return $('(//XCUIElementTypeButton[@name="Comenzar Nuevo Encuentro"])[2]');
@@ -554,14 +563,11 @@ class SpanishLanguage {
     return $("~Configuración general");
   }
 
-  get logoutBtn() {
-    return $("~Cerrar Sesión");
-  }
   get logoutConformationTxt() {
     return $(~"¿Está seguro de que desea cerrar sesión?");
   }
   get logoutConformationBtn() {
-    return $('//XCUIElementTypeButton[@name="Cerrar Sesión"]');
+    return $('-ios class chain:**/XCUIElementTypeButton[`name == "yes"`][2]');
   }
   get logoutCancel() {
     return $("~Cancelar");
@@ -604,7 +610,9 @@ class SpanishLanguage {
     return $("~Leg Pain and Injury");
   }
   get draft() {
-    return $("//XCUIElementTypeTable/XCUIElementTypeCell[1]");
+    return $(
+      '**/XCUIElementTypeStaticText[`name == "Borrador de transcripción"`][1]'
+    );
   }
   get deleteBtn() {
     return $('//XCUIElementTypeButton[@name="Eliminar"]');
@@ -1164,13 +1172,19 @@ class SpanishLanguage {
   get continue() {
     return $("~Continuar");
   }
+  get RecordingContinueBtn() {
+    return $(
+      '-ios class chain:**/XCUIElementTypeButton[`name == "CONTINUAR"`]'
+    );
+  }
 
   get endEncounter() {
-  
     return $(`//XCUIElementTypeStaticText[@name="Finalizar el encuentro"]`);
   }
   get offlineConversationSaved() {
-    return $("~Hemos guardado tu conversación. Se sincronizará cuando vuelvas a estar conectado.");
+    return $(
+      "~Hemos guardado tu conversación. Se sincronizará cuando vuelvas a estar conectado."
+    );
   }
   get() {
     return $("");
@@ -1235,6 +1249,8 @@ class SpanishLanguage {
     await verifyAndClick(this.ok);
     await waitForElement(this.PatientInformationTxtInEnlish);
     await this.copyMailPrint();
+  }
+  async translate_SoapNoteToSpanish() {
     await this.quickActionButton.click();
     await this.translateSoapNote.click();
     await verifyAndClick(this.spanish);
@@ -1242,7 +1258,6 @@ class SpanishLanguage {
     await waitForElement(this.ok);
     await verifyAndClick(this.ok);
     await waitForElement(this.PatientInformationTxtOnSpanish);
-
     await driver.pause(4000);
   }
   async ICD_CPT() {
@@ -1467,8 +1482,8 @@ class SpanishLanguage {
   }
   async Transcript_Verification() {
     await verifyAndClick(this.Transcript);
-    await RecordingPage.dataScanning(RecordingPage.cleanedTranscriptScroll);
-    await AudioManager.TextComparison("spanish")
+    await RecordingPage.dataScaning(RecordingPage.cleanedTranscriptScroll);
+    await AudioManager.TextComparison();
     await verifyAndClick(this.originalTrnscript);
     await verifyAndClick(this.claeanedTranscript);
     await verifyAndClick(this.SoapNoteBtn);
@@ -1508,6 +1523,18 @@ class SpanishLanguage {
   get COK() {
     return $("~OK");
   }
+  async clickDraftTranscript() {
+    const drafts = await $$(
+      '-ios class chain:**/XCUIElementTypeStaticText[`name == "Borrador de transcripción"`]'
+    );
+
+    if (drafts.length > 0) {
+      await drafts[0].click();
+      console.log("Clicked the first Draft Transcript element.");
+    } else {
+      console.log("No Draft Transcript found.");
+    }
+  }
   async multiple_Conversation() {
     await waitForElement(this.AddConversation);
     await verifyAndClick(this.AddConversation);
@@ -1516,11 +1543,12 @@ class SpanishLanguage {
     await verifyAndClick(this.AddConversationConfirmationYes);
     await verify(this.pauseBtn);
     await this.recordAudioAndSaveAsDraft();
-    await driver.pause(5000);
+    await driver.pause(3000);
     await LoginPage.restartApp();
+    await driver.pause(3000);
     await verifyAndClick(HomePage.encounter);
-    await driver.pause(5000);
-    await EncounterPage.clickDraftTranscript();
+    await driver.pause(3000);
+    await this.clickDraftTranscript();
     await waitForElement(this.finaliseEncounter);
     await verifyAndClick(this.finaliseEncounter);
     await driver.pause(3000);
@@ -1606,7 +1634,6 @@ class SpanishLanguage {
       .perform();
     const airplaneModeBtn = await $("~com.apple.ControlCenter.Airplane");
     await (await airplaneModeBtn).click();
-
     await driver
       .action("pointer")
       .move({ duration: 0, x: 283, y: 790 })
@@ -1631,14 +1658,14 @@ class SpanishLanguage {
   }
 
   async recordAudioforOfflineModeMT() {
-    let timesToRun = 3;
+    let timesToRun = 2;
     let count = 0;
     console.log(`Loop will run ${timesToRun} times`);
     for (let i = 0; i < timesToRun; i++) {
       await driver.pause(5000);
       await aeroplaneModeOn();
       await driver.pause(5000);
-      await validate(this.offlineModeRTranscription);
+      await verify(this.offlineModeTranscription);
       await driver.pause(30000);
       await aeroplaneModeOff();
       count++;

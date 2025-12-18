@@ -1,8 +1,4 @@
-import {
- 
-  verify,
-  verifyAndClick,
-} from "../../helpers/helper.js";
+import { verify, verifyAndClick } from "../../helpers/helper.js";
 
 class EncounterPage {
   get Encounter() {

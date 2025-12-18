@@ -1,12 +1,14 @@
 import {
   verifyAndClick,
   verify,
-  validate,
+  waitForElement,
 } from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
 import HomePage from "./home.page.js";
 import RecordingPage from "./recording.page.js";
 import { faker } from "@faker-js/faker";
 import SpanishLanguage from "./spanishLanguage.js";
+import LoginPage from "./login.page.js";
+import { homeEnvVarCheck } from "appium-xcuitest-driver/build/lib/doctor/required-checks.js";
 class SettingsPage {
   get stettings() {
     return $('//XCUIElementTypeNavigationBar[@name="Settings"]');
@@ -118,10 +120,10 @@ class SettingsPage {
     return $("~home");
   }
   get save() {
-    return $("~Guardar");
+    return $("~Save");
   }
   get cancel() {
-    return $("~Cancelar");
+    return $("~Cancel");
   }
   get speciality() {
     return $("~speciality");
@@ -212,6 +214,12 @@ class SettingsPage {
   get noChangeInfoMessage() {
     return $(`~No changes to update!`);
   }
+  get call() {
+    return $(`~Call +1 (516) 550-7579`);
+  }
+  get callCancel() {
+    return $('-ios class chain:**/XCUIElementTypeButton[`name == "Cancel"`]');
+  }
 
   async profileSettingScreen() {
     await verifyAndClick(this.profileSettings);
@@ -254,10 +262,10 @@ class SettingsPage {
     await verifyAndClick(this.profileEditback);
     await verifyAndClick(this.profileSettings);
     await verifyAndClick(this.edit);
-    await validate(this.firstName);
-    await validate(this.middleName);
-    await validate(this.lastName);
-    await validate(this.number);
+    await verify(this.firstName);
+    await verify(this.middleName);
+    await verify(this.lastName);
+    await verify(this.number);
     await verifyAndClick(this.cancel);
     await verifyAndClick(this.profileEditback);
   }
@@ -267,33 +275,33 @@ class SettingsPage {
     await verifyAndClick(this.firstName);
     await this.firstName.clearValue();
     await verifyAndClick(this.save);
-    await validate(this.firstnameError);
+    await verify(this.firstnameError);
   }
   async firstNameUpdateValidation() {
     const FirstName = await this.firstNameTextField.setValue("Naga");
     await verifyAndClick(this.save);
-    await validate(this.noChangeInfoMessage);
+    await verify(this.noChangeInfoMessage);
     await verifyAndClick(this.ok);
   }
   async LastNameErrorValidation() {
     await verifyAndClick(this.lastName);
     await this.lastName.clearValue();
     await verifyAndClick(this.save);
-    await validate(this.lastNameError);
+    await verify(this.lastNameError);
   }
   async LastNameUpdateValidation() {
     const LastName = await this.lastNameTextField.setValue("Subbarayudu");
     await verifyAndClick(this.phoneNumberTextfield);
     await this.phoneNumberTextfield.clearValue();
     await verifyAndClick(this.save);
-    await validate(this.phoneNumberError);
+    await verify(this.phoneNumberError);
   }
   async LastNameUpdateValidation() {
     const LastName = await this.lastNameTextField.setValue("Subbarayudu");
     await verifyAndClick(this.phoneNumberTextfield);
     await this.phoneNumberTextfield.clearValue();
     await verifyAndClick(this.save);
-    await validate(this.phoneNumberError);
+    await verify(this.phoneNumberError);
   }
   async specificSpecialityErrorValidation() {
     await verifyAndClick(this.specialityDropDown);
@@ -302,21 +310,26 @@ class SettingsPage {
     await $(`~Other`).click();
     await this.enterSpcificSpecialityTextField.clearValue();
     await verifyAndClick(this.save);
-    await validate(this.specificSpecialityError);
+    await verify(this.specificSpecialityError);
   }
   async specificSpecialityUpdateValidation() {
     const enterSpcificSpeciality =
       await this.enterSpcificSpecialityTextField.setValue("Ortho");
     await verifyAndClick(this.save);
-    await validate(this.noChangeInfoMessage);
+    await verify(this.noChangeInfoMessage);
     await verifyAndClick(this.ok);
     await verifyAndClick(this.cancel);
     await verifyAndClick(this.profileEditback);
   }
 
   async support_VerifiCation() {
-    // await verifyAndClick(this.help);
+    await LoginPage.restartApp();
+    await waitForElement(HomePage.startNewEncounterButton);
+    await verifyAndClick(HomePage.settings); // till the profile edit is working or not
+    await verifyAndClick(this.help);
     // await verifyAndClick(this.phone);
+    // await this.call.click()
+    // await driver.pause(2000)
 
     // const phoneBundleId = "com.apple.Numbers"; // phone's bundle ID for iOS
 
@@ -331,15 +344,14 @@ class SettingsPage {
     // }
 
     // console.log("phone is active");
-
+    // await verifyAndClick(this.callCancel)
     // // Pause for 5 seconds
     // await driver.pause(5000);
-    // Switch back to the original app
-    // await driver.activateApp(process.env.BUNDLE_ID);
-    await HomePage.settings.click();
-    await verifyAndClick(this.help);
+    // if (!(await this.phone.isExisting())) {
+    //   await verifyAndClick(HomePage.settings);
+    //   await verifyAndClick(this.help);
+    // }
     await verifyAndClick(this.email);
-    // Verify Gmail is active
     const gmailBundleId = "com.google.Gmail";
     const gmailAppState = await driver.execute("mobile: queryAppState", {
       bundleId: gmailBundleId,
@@ -351,9 +363,11 @@ class SettingsPage {
     }
     console.log("Gmail is active");
     await driver.activateApp(process.env.BUNDLE_ID);
-    // Open Settings and Help, then click text element to launch Messages
-    await verifyAndClick(HomePage.settings);
-    await verifyAndClick(this.help);
+    // await verifyAndClick(this.help);
+    if (!(await this.phone.isExisting())) {
+      await verifyAndClick(HomePage.settings);
+      await verifyAndClick(this.help);
+    }
     await verifyAndClick(this.text);
     // Verify Messages is active
     const messagesBundleId = "com.apple.MobileSMS";
@@ -370,18 +384,23 @@ class SettingsPage {
     await driver.activateApp(process.env.BUNDLE_ID);
   }
   async launguageChange() {
+    await LoginPage.restartApp();
+    await waitForElement(HomePage.startNewEncounterButton);
     await verifyAndClick(HomePage.settings);
     await verifyAndClick(this.launguage);
     await verifyAndClick(this.spanish);
     await verify(this.Idioma);
     await verifyAndClick(this.home);
-    await Validate(SpanishLanguage.startNewEncounter);
+    await verify(SpanishLanguage.startNewEncounter);
     await verifyAndClick(HomePage.settings);
-    await verifyAndClick(this.launguage);
-    await verifyAndClick(this.english);
-    await validate(this.launguage);
+    await verifyAndClick(SpanishLanguage.Idioma);
+    await verifyAndClick(SpanishLanguage.english);
+    await verify(this.launguage);
   }
   async generalSettingsUpdate() {
+    await LoginPage.restartApp();
+    await waitForElement(HomePage.startNewEncounterButton);
+    await verifyAndClick(HomePage.settings);
     await verifyAndClick(this.generalSettings);
     await verifyAndClick(this.selectAllOff);
     await verifyAndClick(this.Done);
@@ -391,27 +410,27 @@ class SettingsPage {
     await verifyAndClick(this.selectAllOn);
     await verifyAndClick(this.Done);
     await verifyAndClick(this.generalSettings);
-    await validate(this.selectAllOff);
-    await validate(this.cdss);
-    await validate(this.diognosisJustification);
+    await verify(this.selectAllOff);
+    await verify(this.cdss);
+    await verify(this.diognosisJustification);
     await verifyAndClick(this.cancel);
     await verifyAndClick(this.generalSettings);
     await verifyAndClick(this.cdss);
     await verifyAndClick(this.Done);
     await verifyAndClick(this.generalSettings);
-    await validate(this.cdssDisabled);
+    await verify(this.cdssDisabled);
     await verifyAndClick(this.cdssDisabled);
     await verifyAndClick(this.Done);
     await verifyAndClick(this.generalSettings);
-    await validate(this.diognosisJustification);
+    await verify(this.diognosisJustification);
     await verifyAndClick(this.diognosisJustification);
     await verifyAndClick(this.Done);
     await verifyAndClick(this.generalSettings);
-    await validate(this.diognosisJustificationDisabled);
+    await verify(this.diognosisJustificationDisabled);
     await verifyAndClick(this.diognosisJustificationDisabled);
     await verifyAndClick(this.Done);
     await verifyAndClick(this.generalSettings);
-    await validate(this.selectAllOff);
+    await verify(this.selectAllOff);
     await verifyAndClick(this.cancel);
   }
 }

@@ -2,14 +2,13 @@ import { spawn } from "child_process";
 import { exec } from "child_process";
 import util from "util";
 import fs from "fs";
-import {
-  normalizeText,
-  levenshtein,
-} from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
+import path from "path";
+import levenshtein from "fast-levenshtein";
+import allureReporter from "@wdio/allure-reporter";
+
 import RecordingPage from "../screenObjectModel/recording.page.js";
 import SpanishLanguage from "../screenObjectModel/spanishLanguage.js";
 // import path from "path";
-import allureReporter from "@wdio/allure-reporter";
 const execPromise = util.promisify(exec);
 class AudioManager {
   constructor() {
@@ -21,6 +20,8 @@ class AudioManager {
     };
     this.currentAudioFile = null;
     this.currentProcess = null;
+    this.languageUsed = null; // ✅ stores selected language
+
     this.isPaused = false;
     this.pausedTime = 0; // Track paused time in seconds
     this.startTime = 0; // Track start time in seconds
@@ -48,20 +49,20 @@ class AudioManager {
   }
 
   async LiveTranscript(language = "english", checkInterval = 2000) {
-    const TRANSCRIPT_SELECTOR = '//XCUIElementTypeTextView';
+    const TRANSCRIPT_SELECTOR = "//XCUIElementTypeTextView";
     const englishOffline = await RecordingPage.offlineModeRTranscription;
-    const spanishOffline = await SpanishLanguage.offlineModeRTranscription;
-  
+    const spanishOffline = await SpanishLanguage.offlineModeTranscription;
+
     const OFFLINE_SELECTORS = {
       english: englishOffline,
       spanish: spanishOffline,
     };
-  
+
     const offlineSelector = OFFLINE_SELECTORS[language];
-  
+
     let previousText = "";
     this._monitoring = true;
-  
+
     (async () => {
       while (this._monitoring) {
         try {
@@ -74,10 +75,10 @@ class AudioManager {
             );
             break;
           }
-  
+
           const transcriptElement = await $(TRANSCRIPT_SELECTOR);
           const currentText = await transcriptElement.getText();
-  
+
           if (currentText && currentText.trim() !== previousText) {
             previousText = currentText;
             allureReporter.addStep(
@@ -92,7 +93,7 @@ class AudioManager {
               "broken"
             );
           }
-  
+
           const audioPlayedTime =
             this.playedTime +
             (this.isPaused ? 0 : Date.now() / 1000 - this.startTime);
@@ -105,7 +106,7 @@ class AudioManager {
             );
             break;
           }
-  
+
           await driver.pause(checkInterval);
         } catch (err) {
           allureReporter.addStep(
@@ -117,9 +118,10 @@ class AudioManager {
       }
     })();
   }
-  
+
   async playAudio(language) {
-    const audioFilePath = this.audioFiles[language] 
+    const audioFilePath = this.audioFiles[language];
+    this.languageUsed = language; // ✅ remember language
 
     if (this.isPaused && this.currentProcess) {
       this.currentProcess = spawn("afplay", [
@@ -151,8 +153,7 @@ class AudioManager {
       return this.currentAudioFile;
     }
   }
-  
-  
+
   async pauseAudio() {
     if (this.currentProcess && !this.isPaused) {
       this.playedTime += Date.now() / 1000 - this.startTime; // 🔹 accumulate playback
@@ -175,6 +176,7 @@ class AudioManager {
   }
 
   async stopAudio() {
+    const language = this.languageUsed;
     if (this.currentProcess) {
       const { stdout } = await execPromise("pgrep afplay || true");
       if (stdout.trim()) {
@@ -182,7 +184,6 @@ class AudioManager {
       }
       this.currentProcess = null;
     }
-
     // 🔹 Final played time update
     if (!this.isPaused && this.startTime) {
       this.playedTime += Date.now() / 1000 - this.startTime;
@@ -195,14 +196,6 @@ class AudioManager {
       spanish:
         "/Users/nagasubarayudu/Desktop/IOS/utils/audiotranscripts/CardiacArrestEs.txt",
     };
-
-    // Find which transcript to use
-    let language = "english";
-    for (const [lang, path] of Object.entries(this.audioFiles)) {
-      if (path === this.currentAudioFile) {
-        language = lang;
-      }
-    }
 
     const transcriptPath = transcriptMap[language];
     const fullTranscript = fs
@@ -238,20 +231,13 @@ class AudioManager {
     }
     return logFile;
   }
+  // textComparison.js
+  // Auto-fetch latest scanned and played transcript files, compare with threshold
 
-  async TextComparison(language) {
-    // Constants inside the function
-    const TRANSCRIPTS = {
-      english:
-        "/Users/nagasubarayudu/Desktop/IOS/utils/audiotranscripts/CardiacArrest.txt",
-      spanish:
-        "/Users/nagasubarayudu/Desktop/IOS/utils/audiotranscripts/CardiacArrestES.txt",
-    };
+  async TextComparison() {
+    const SCANNED_DIR = "/Users/nagasubarayudu/Desktop/IOS/_results_/";
+    const PLAYED_DIR = "/Users/nagasubarayudu/Desktop/IOS/utils/audioLogs/";
 
-    const SCANNED_DIR =
-      "/Users/nagasubarayudu/Desktop/IOS/TranscriptFiles/_results_";
-
-    // Helper functions inside the function
     const normalizeText = (text) => {
       return text
         .replace(/--+\s*Conversation\s*\d+\s*--+/gi, " ")
@@ -269,60 +255,50 @@ class AudioManager {
       return [...new Set(lines)].join(" ");
     };
 
-    // Select transcript file based on language
-    const transcriptPath = TRANSCRIPTS[language.toUpperCase()];
-    if (!transcriptPath)
-      throw new Error(`Transcript not found for language: ${language}`);
-    if (!fs.existsSync(transcriptPath))
-      throw new Error(`Transcript file missing: ${transcriptPath}`);
+    const getLatestFile = (dir, prefix) => {
+      const files = fs
+        .readdirSync(dir)
+        .filter((f) => f.startsWith(prefix) && f.endsWith(".txt"))
+        .sort((a, b) => b.localeCompare(a));
 
-    // Automatically get latest scanned text
-    const scannedFiles = fs
-      .readdirSync(SCANNED_DIR)
-      .filter((f) => f.startsWith("scanned_texts_") && f.endsWith(".txt"))
-      .sort((a, b) => b.localeCompare(a));
-    if (!scannedFiles.length) throw new Error("No scanned text files found.");
-    const latestScanned = path.join(SCANNED_DIR, scannedFiles[0]);
+      if (!files.length)
+        throw new Error(`No files found with prefix ${prefix} in ${dir}`);
+      return path.join(dir, files[0]);
+    };
+    const scannedFile = getLatestFile(SCANNED_DIR, "scanned_texts_");
+    const playedFile = getLatestFile(PLAYED_DIR, "played_audio_");
 
-    // Read and normalize scanned text
-    const scannedTextRaw = fs.readFileSync(latestScanned, "utf8");
-    const scannedText = normalizeText(deduplicateText(scannedTextRaw));
+    const scannedRaw = fs.readFileSync(scannedFile, "utf8");
+    const playedRaw = fs.readFileSync(playedFile, "utf8");
 
-    // Read and normalize transcript
-    const transcriptText = normalizeText(
-      fs.readFileSync(transcriptPath, "utf8")
-    );
+    const scannedText = normalizeText(deduplicateText(scannedRaw));
+    const playedText = normalizeText(playedRaw);
 
-    // Take portion of transcript equal to scanned text length
-    const transcriptSlice = transcriptText.slice(0, scannedText.length);
+    const playedSlice = playedText.slice(0, scannedText.length);
 
-    // Compute Levenshtein similarity
-    const distance = levenshtein(scannedText, transcriptSlice);
-    const maxLen = Math.max(scannedText.length, transcriptSlice.length) || 1;
+    const distance = levenshtein.get(scannedText, playedSlice);
+    const maxLen = Math.max(scannedText.length, playedSlice.length) || 1;
     const similarity = ((1 - distance / maxLen) * 100).toFixed(2);
 
-    const threshold = 85;
-    const status =
-      similarity >= threshold ? "✅ Match found" : "❌ Below threshold";
+    const threshold = 90;
+    const status = similarity >= threshold ? "Match Pass" : "Match Fail";
 
-    // Allure reporting
-    allureReporter.step(
-      `Text comparison [${language.toUpperCase()}]: ${status} (${similarity}%)`,
-      () => {
-        allureReporter.attachment(
-          "Scanned Text (Deduplicated)",
-          scannedText,
-          "text/plain"
-        );
-      }
-    );
+    allureReporter.addAttachment("Scanned Text", scannedText, "text/plain");
+    allureReporter.addAttachment("Played Text", playedText, "text/plain");
+   
+ 
+
+    if (similarity < threshold) {
+      allureReporter.addDescription(
+        "the thrusg=h hold we got less then 85% check over it"
+      );
+    }
 
     return {
-      scannedFile: latestScanned,
-      transcriptFile: transcriptPath,
+      scannedFile,
+      playedFile,
       similarity: `${similarity}%`,
       status,
-      language: language.toUpperCase(),
     };
   }
 }
