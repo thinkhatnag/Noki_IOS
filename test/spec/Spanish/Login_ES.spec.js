@@ -10,7 +10,6 @@ describe("Spanish", () => {
   beforeEach(() => {
     allureReporter.addOwner("Mobile Team");
     allureReporter.addEpic("NOKI IOS Automation");
-    allureReporter.addParentSuite("Spanish");
   });
   describe("Login", () => {
   
