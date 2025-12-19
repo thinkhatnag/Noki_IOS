@@ -41,13 +41,13 @@ export const config = {
   // of the config file unless it's absolute.
   //
   specs: [
-    // './test/spec/English/Forgot_Password.spec.js',
+    // "./test/spec/English/Forgot_Password.spec.js",
     // "./test/spec/English/Login.spec.js",
-    // "./test/spec/English/home.spec.js",
+    // // "./test/spec/English/home.spec.js",
     // "./test/spec/English/Setting.spec.js",
     // "./test/spec/English/New_Patient.spec.js",
     // "./test/spec/English/Existing_Patient.spec.js",
-    // './test/spec/Spanish/Forgot_Password_ES.spec.js',
+    // "./test/spec/Spanish/Forgot_Password_ES.spec.js",
     // "./test/spec/Spanish/Login_Es.spec.js",
     // "./test/spec/Spanish/Settings_ES.spec.js",
     // "./test/spec/Spanish/New_Patient_ES.spec.js",

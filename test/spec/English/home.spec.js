@@ -8,23 +8,19 @@ import AddPatientPage from "../../screenObjectModel/addPatient.page.js";
 import { verify, verifyAndClick } from "../../../helpers/helper.js";
 import LoginPage from "../../screenObjectModel/login.page.js";
 import allureReporter from "@wdio/allure-reporter";
-  before(() => {
-    allureReporter.addEpic("NOKI IOS Automation");
-    allureReporter.addOwner("Mobile Team");
-    allureReporter.addParentSuite('English')
-    allureReporter.addSubSuite('Home Navigation')
-  });
+beforeEach(() => {
+  allureReporter.addSubSuite("Home Navigation & UI Verification");
+});
 
-  it("Verify all tab bar elements are working correctly {TC11}", async () => {
-    await HomePage.patients.click();
-    await verify(PatientsPage.patientSearch);
-    await verifyAndClick(HomePage.encounter);
-    await verify(EncounterPage.Encounter);
-    await verifyAndClick(HomePage.settings);
-    await verify(SettingsPage.profileSettings);
-    await LoginPage.restartApp();
-  });
-
+it("Verify all tab bar elements are working correctly {TC11}", async () => {
+  await HomePage.patients.click();
+  await verify(PatientsPage.patientSearch);
+  await verifyAndClick(HomePage.encounter);
+  await verify(EncounterPage.Encounter);
+  await verifyAndClick(HomePage.settings);
+  await verify(SettingsPage.profileSettings);
+  await LoginPage.restartApp();
+});
 
 //     it('Verify the audio recording process {TC12}', async() => {
 //         await HomePage.startNewEncounterButton.click();

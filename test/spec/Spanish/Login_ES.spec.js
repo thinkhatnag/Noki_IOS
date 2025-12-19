@@ -2,7 +2,6 @@ import { verify, verifyAndClick } from "../../../helpers/helper.js";
 import SpanishLanguage from "../../screenObjectModel/spanishLanguage.js";
 import allureReporter from "@wdio/allure-reporter";
 import LoginPage from "../../screenObjectModel/login.page.js";
-import { version } from "react";
 beforeEach(() => {
   allureReporter.addSubSuite("Login");
 });

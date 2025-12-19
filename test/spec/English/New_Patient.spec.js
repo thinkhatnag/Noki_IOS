@@ -124,6 +124,7 @@ it("Second Conversation for the first Encounter", async () => {
   await driver.activateApp(process.env.BUNDLE_ID);
   await driver.pause(5000);
   await aeroplanemodeswipe();
+  await waitForElement(RecordingPage.ContinueBtn)
   await verifyAndClick(RecordingPage.endEncounter);
 });
 it("SOAP Note Verification for the Second Conversation in First Encounter", async () => {

@@ -595,9 +595,6 @@ class SpanishLanguage {
   get goBack() {
     return $("~Left");
   }
-  get startNewEncounter() {
-    return $('//XCUIElementTypeButton[@name="Comenzar Nuevo Encuentro"]');
-  }
 
   //Enconter Screen
   get Encounter() {
@@ -1736,7 +1733,7 @@ class SpanishLanguage {
     await waitForElement(this.Mic);
     await verifyAndClick(this.Mic);
     await driver.pause(2000);
-    await playTTS("Grupo sanguíneo O negativo", "Alex", 1.1);
+    await playTTS("Grupo sanguíneo O negativo", "Alex", 0.8);
     await driver.pause(2000);
     await verifyAndClick(this.MicStop);
     await verifyAndClick(this.send);

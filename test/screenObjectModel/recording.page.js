@@ -747,11 +747,9 @@ class RecordingPage {
       }
     }
 
-    // Combine all text blocks into a single string
     const combinedText = allScannedTexts.join("\n");
     let textToSave = combinedText;
 
-    // 2️⃣ Find the first occurrence of any stop marker (case-insensitive)
     let firstMarkerIndex = -1;
     for (const marker of stopMarkers) {
       const index = combinedText.toLowerCase().indexOf(marker.toLowerCase());
@@ -763,7 +761,6 @@ class RecordingPage {
       }
     }
 
-    // 3️⃣ Cut text at the first found marker (if any)
     if (firstMarkerIndex !== -1) {
       textToSave = combinedText.substring(0, firstMarkerIndex).trim();
       console.log(

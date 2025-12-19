@@ -59,7 +59,8 @@ export async function aeroplaneModeOn() {
     .up({ button: 0 })
     .perform();
   await driver.pause(1000);
-  await RecordingPage.playBtn.click();
+  await waitForElement(RecordingPage.playBtn);
+  await verifyAndClick(RecordingPage.playBtn);
   await AudioManager.resumeAudio();
 }
 export async function aeroplaneModeOff() {
@@ -86,7 +87,7 @@ export async function aeroplaneModeOff() {
     .perform();
   await driver.pause(4000);
   await waitForElement(RecordingPage.playBtn);
-  await RecordingPage.playBtn.click()
+  await verifyAndClick(RecordingPage.playBtn);
   await AudioManager.resumeAudio();
 }
 export async function normalizeText(text) {

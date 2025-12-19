@@ -7,7 +7,7 @@ import {
   LiveTranscript,
   validate,
   aeroplanemodeswipe,
-} from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
+} from "../../../helpers/helper.js";
 import allureReporter from "@wdio/allure-reporter";
 import AudioManeger from "../../screenObjectModel/audioManeger.js";
 import LoginPage from "../../screenObjectModel/login.page.js";
@@ -15,8 +15,6 @@ import SettingsPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectMod
 import SpanishLanguage from "../../screenObjectModel/spanishLanguage.js";
 import recordingPage from "../../screenObjectModel/recording.page.js";
 beforeEach(() => {
-  allureReporter.addEpic("NOKI IOS Automation");
-  allureReporter.addOwner("Mobile Team");
   allureReporter.addSubSuite("First Encounter E2E Flow -Es");
 });
 
@@ -122,7 +120,7 @@ it("Transcript Verification for the Draft Conversation for the First Encounter -
 });
 
 it("Generation and Regeneration of Quick Action Templates {ICD & CPT, Care Plan, Feedback, Referral}for the First Encounter -Es", async () => {
-  await SpanishLanguage.translate_SoapNoteToSpanish()
+  await SpanishLanguage.translate_SoapNoteToSpanish();
   await SpanishLanguage.ICD_CPT();
   await SpanishLanguage.care_Plan();
   await SpanishLanguage.feed_Back();

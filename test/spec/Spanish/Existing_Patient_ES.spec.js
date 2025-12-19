@@ -14,8 +14,6 @@ import SettingsPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectMod
 import SpanishLanguage from "../../screenObjectModel/spanishLanguage.js";
 import HomePage from "../../screenObjectModel/home.page.js";
 beforeEach(() => {
-  allureReporter.addEpic("NOKI IOS Automation");
-  allureReporter.addOwner("Mobile Team");
   allureReporter.addSubSuite("New Encounter E2E flow -Es");
 });
 
@@ -158,9 +156,11 @@ it("Finalize Encounter -Es", async () => {
 });
 it("Logout -Es", async () => {
   await LoginPage.restartApp();
+  await waitForElement(HomePage.settings);
   await verifyAndClick(HomePage.settings);
   await verifyAndClick(SpanishLanguage.launguage);
   await verifyAndClick(SpanishLanguage.english);
+  await waitForElement(SettingsPage.logoutBtn);
   await verifyAndClick(SettingsPage.logoutBtn);
   await verifyAndClick(SettingsPage.logoutConformationBtn);
   await validate(LoginPage.loginButton);
