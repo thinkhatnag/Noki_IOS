@@ -1,0 +1,400 @@
+
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Mobile Test Report</title>
+            <style>
+                /* Your existing CSS styles here */
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    background: #f5f5f5;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 1400px;
+                    margin: 0 auto;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                }
+                .header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 30px;
+                }
+                .header h1 { margin-bottom: 10px; font-size: 28px; }
+                .header p { opacity: 0.9; font-size: 14px; }
+                .stats {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 20px;
+                    padding: 30px;
+                    background: #f9fafb;
+                }
+                .stat-card {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    border-left: 4px solid #667eea;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                .stat-card.passed { border-left-color: #10b981; }
+                .stat-card.failed { border-left-color: #ef4444; }
+                .stat-card.skipped { border-left-color: #f59e0b; }
+                .stat-card h3 {
+                    color: #6b7280;
+                    font-size: 14px;
+                    font-weight: 500;
+                    margin-bottom: 8px;
+                    text-transform: uppercase;
+                }
+                .stat-card .value {
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #1f2937;
+                }
+                .test-table-section { padding: 30px; }
+                .test-table-section h2 {
+                    margin-bottom: 20px;
+                    color: #1f2937;
+                    font-size: 20px;
+                }
+                .save-indicator {
+                    display: inline-block;
+                    margin-left: 10px;
+                    padding: 4px 12px;
+                    background: #10b981;
+                    color: white;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                }
+                .save-indicator.show { opacity: 1; }
+                .legend {
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+                    padding: 15px;
+                    background: #f9fafb;
+                    border-radius: 4px;
+                    display: flex;
+                    gap: 20px;
+                    flex-wrap: wrap;
+                    border: 1px solid #e5e7eb;
+                }
+                .legend-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 14px;
+                }
+                .legend-item span { font-weight: 600; }
+                .legend-item.passed span { color: #10b981; }
+                .legend-item.failed span { color: #ef4444; }
+                .legend-item.skipped span { color: #f59e0b; }
+                .legend-item.not-run span { color: #9ca3af; }
+                .test-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+                .test-table thead { background: #f9fafb; }
+                .test-table th {
+                    padding: 15px;
+                    text-align: left;
+                    font-weight: 600;
+                    color: #374151;
+                    border-bottom: 2px solid #e5e7eb;
+                    font-size: 14px;
+                    text-transform: uppercase;
+                }
+                .test-table td {
+                    padding: 15px;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+                .test-table tbody tr:hover { background: #f9fafb; }
+                .test-name {
+                    font-weight: 500;
+                    color: #1f2937;
+                    max-width: 400px;
+                }
+                .status { font-weight: 600; font-size: 14px; }
+                .status.passed { color: #10b981; }
+                .status.failed { color: #ef4444; }
+                .status.skipped { color: #f59e0b; }
+                .status.not-run { color: #9ca3af; }
+                .comment-cell { min-width: 250px; }
+                .comment-input {
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 4px;
+                    font-size: 14px;
+                }
+                .comment-input:focus {
+                    outline: none;
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                }
+                .details {
+                    padding: 30px;
+                    border-top: 1px solid #e5e7eb;
+                }
+                .details h2 {
+                    margin-bottom: 20px;
+                    color: #1f2937;
+                }
+                .info-grid { display: grid; gap: 10px; }
+                .info-row {
+                    display: grid;
+                    grid-template-columns: 200px 1fr;
+                    padding: 12px;
+                    background: #f9fafb;
+                    border-radius: 4px;
+                }
+                .info-label { font-weight: 600; color: #6b7280; }
+                .info-value { color: #1f2937; }
+                .footer {
+                    text-align: center;
+                    padding: 20px;
+                    color: #6b7280;
+                    font-size: 14px;
+                    border-top: 1px solid #e5e7eb;
+                }
+                .export-btn {
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                .export-btn:hover { background: #5568d3; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🚀 Mobile Test Report</h1>
+                    <p>Platform: mobile | Generated: 2/15/2026, 8:05:55 PM</p>
+                    <p style="margin-top: 5px; font-size: 12px;">Data source: Allure Results</p>
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>Total Tests</h3>
+                        <div class="value">9</div>
+                    </div>
+                    <div class="stat-card passed">
+                        <h3>✓ Passed</h3>
+                        <div class="value" style="color: #10b981;">9</div>
+                    </div>
+                    <div class="stat-card failed">
+                        <h3>✗ Failed</h3>
+                        <div class="value" style="color: #ef4444;">0</div>
+                    </div>
+                    <div class="stat-card skipped">
+                        <h3>⊗ Skipped</h3>
+                        <div class="value" style="color: #f59e0b;">0</div>
+                    </div>
+                </div>
+                <div class="test-table-section">
+                    <h2>Test Cases Detail <span class="save-indicator" id="saveIndicator">✓ Saved</span></h2>
+                    <div class="legend">
+                        <div class="legend-item passed"><span>✓ PASS</span> - Test Passed</div>
+                        <div class="legend-item failed"><span>✗ FAIL</span> - Test Failed</div>
+                        <div class="legend-item skipped"><span>⊗ SKIPPED</span> - Test Skipped</div>
+                        <div class="legend-item not-run"><span>- NOT RUN</span> - Test Not Executed</div>
+                    </div>
+                    <table class="test-table">
+                        <thead>
+                            <tr>
+                                <th>Test Case</th>
+                                <th>English</th>
+                                <th>Spanish</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                <tr>
+                    <td class="test-name">Login Error message verification: "wrong password"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="0"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Error messge verification: "Email is not provided"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="1"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Error message verification: "not registered Email"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="2"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Error message verification: "Password not Provided"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="3"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Error message verification: "invalid Email"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="4"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Error message verification: "short Password"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="5"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Login UI Verification</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="6"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="test-name">Error message verification: "wrong password"</td>
+                    <td class="status passed">✓ PASS</td>
+                    <td class="status not-run">- NOT RUN</td>
+                    <td class="comment-cell">
+                        <input type="text" 
+                               class="comment-input" 
+                               data-test-index="7"
+                               placeholder="Add comment..." 
+                               onchange="saveData()" />
+                    </td>
+                </tr>
+                        </tbody>
+                    </table>
+                    <button class="export-btn" onclick="exportToCSV()">📥 Export to CSV</button>
+                </div>
+                <div class="details">
+                    <h2>Test Execution Details</h2>
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <div class="info-label">Platform:</div>
+                            <div class="info-value">MOBILE</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Exit Code:</div>
+                            <div class="info-value">✓ Success</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Total Duration:</div>
+                            <div class="info-value">0.00 seconds</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Report Generated:</div>
+                            <div class="info-value">2/15/2026, 8:05:55 PM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>Automated Mobile Testing Report - WebdriverIO + Appium + Allure</p>
+                </div>
+            </div>
+            <script>
+                function loadData() {
+                    const inputs = document.querySelectorAll('.comment-input');
+                    inputs.forEach((input) => {
+                        const testIndex = input.getAttribute('data-test-index');
+                        const saved = localStorage.getItem('test_comment_' + testIndex);
+                        if (saved) { input.value = saved; }
+                    });
+                }
+                function saveData() {
+                    const inputs = document.querySelectorAll('.comment-input');
+                    inputs.forEach((input) => {
+                        const testIndex = input.getAttribute('data-test-index');
+                        localStorage.setItem('test_comment_' + testIndex, input.value);
+                    });
+                    const indicator = document.getElementById('saveIndicator');
+                    indicator.classList.add('show');
+                    setTimeout(() => { indicator.classList.remove('show'); }, 2000);
+                }
+                function exportToCSV() {
+                    const rows = document.querySelectorAll('.test-table tbody tr');
+                    let csv = 'Test Case,English,Spanish,Comments\n';
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length === 4) {
+                            const testName = cells[0].textContent.trim();
+                            const english = cells[1].textContent.trim();
+                            const spanish = cells[2].textContent.trim();
+                            const input = cells[3].querySelector('.comment-input');
+                            const comment = input ? input.value.replace(/,/g, ';').replace(/"/g, '""') : '';
+                            csv += '"' + testName + '","' + english + '","' + spanish + '","' + comment + '"\n';
+                        }
+                    });
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'test-report-' + new Date().toISOString().split('T')[0] + '.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                }
+                window.addEventListener('load', loadData);
+            </script>
+        </body>
+        </html>
