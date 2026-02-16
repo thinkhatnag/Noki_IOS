@@ -1,9 +1,130 @@
-<!DOCTYPE html>
+import fs from "fs";
+import path from "path";
+import { glob, globSync } from "glob"; // ← or just the ones you actually use
+console.log("\n🚀 Generating Test Report from Allure Results...\n");
+
+// Configuration
+const ALLURE_RESULTS_DIR = path.join(process.cwd(), "allure-results");
+const OUTPUT_DIR = path.join(process.cwd(), "reports");
+const OUTPUT_FILE = path.join(OUTPUT_DIR, "test-report.html");
+
+// Create output directory
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
+
+// Check if Allure results exist
+if (!fs.existsSync(ALLURE_RESULTS_DIR)) {
+  console.error("❌ Allure results directory not found!");
+  console.error("   Expected:", ALLURE_RESULTS_DIR);
+  console.error("   Please run tests first: npm run wdio");
+  process.exit(1);
+}
+
+// Read all Allure result JSON files
+const pattern = path.join(ALLURE_RESULTS_DIR, "*-result.json");
+const resultFiles = glob.sync(pattern);
+
+console.log(`📊 Found ${resultFiles.length} test result files`);
+
+if (resultFiles.length === 0) {
+  console.error("❌ No test result files found!");
+  console.error("   Run tests first: npm run wdio");
+  process.exit(1);
+}
+
+// Parse all test results
+const testCases = [];
+
+resultFiles.forEach((file) => {
+  try {
+    const data = fs.readFileSync(file, "utf8");
+    const testResult = JSON.parse(data);
+
+    const testName = testResult.name || "Unknown Test";
+    const status = testResult.status || "unknown";
+    const duration = (testResult.stop || 0) - (testResult.start || 0);
+    const error = testResult.statusDetails?.message || null;
+
+    const isSpanish =
+      testName.includes("-Es") ||
+      testName.includes("_Es") ||
+      testName.includes(" Es ");
+
+    const baseTestName = testName.replace(/-Es|_Es| Es /gi, "").trim();
+
+    testCases.push({
+      name: testName,
+      baseTestName: baseTestName,
+      passed: status === "passed",
+      skipped: status === "skipped" || status === "pending",
+      failed: status === "failed" || status === "broken",
+      duration: duration,
+      error: error,
+      isSpanish: isSpanish,
+      status: status,
+    });
+  } catch (error) {
+    console.error(`⚠️  Error reading ${file}:`, error.message);
+  }
+});
+
+console.log(`✅ Parsed ${testCases.length} test cases`);
+
+// Group tests by base name
+const groupedTests = {};
+testCases.forEach((test) => {
+  if (!groupedTests[test.baseTestName]) {
+    groupedTests[test.baseTestName] = {
+      baseTestName: test.baseTestName,
+      english: null,
+      spanish: null,
+    };
+  }
+
+  if (test.isSpanish) {
+    groupedTests[test.baseTestName].spanish = test;
+  } else {
+    groupedTests[test.baseTestName].english = test;
+  }
+});
+
+const reportDate = new Date().toLocaleString();
+const reportTimestamp = new Date().toISOString();
+
+// Prepare data for embedding
+const testDataJson = JSON.stringify(
+  {
+    testCases: testCases,
+    groupedTests: Object.values(groupedTests).map((g, i) => ({
+      index: i,
+      baseTestName: g.baseTestName,
+      english: g.english,
+      spanish: g.spanish,
+    })),
+    stats: {
+      total: testCases.length,
+      passed: testCases.filter((t) => t.passed).length,
+      failed: testCases.filter((t) => t.failed).length,
+      skipped: testCases.filter((t) => t.skipped).length,
+    },
+    meta: {
+      platform: "iOS",
+      reportDate: reportDate,
+      reportTimestamp: reportTimestamp,
+    },
+  },
+  null,
+  2,
+);
+
+// Generate standalone HTML
+const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Test Report - 2/16/2026, 7:23:14 AM</title>
+    <title>Mobile Test Report - ${reportDate}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -259,366 +380,7 @@
     
     <script>
         // Embedded test data
-        const REPORT_DATA = {
-  "testCases": [
-    {
-      "name": "Login Error message verification: \"invalid Email\"",
-      "baseTestName": "Login Error message verification: \"invalid Email\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8300,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"wrong password\"",
-      "baseTestName": "Login Error message verification: \"wrong password\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 15235,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"short Password\"",
-      "baseTestName": "Login Error message verification: \"short Password\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 15548,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"invalid Email\"",
-      "baseTestName": "Login Error message verification: \"invalid Email\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8541,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login UI Verification",
-      "baseTestName": "Login UI Verification",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 5331,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"Password not Provided\"",
-      "baseTestName": "Login Error message verification: \"Password not Provided\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 13536,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"invalid Email\"",
-      "baseTestName": "Login Error message verification: \"invalid Email\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8518,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"not registered Email\"",
-      "baseTestName": "Login Error message verification: \"not registered Email\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8038,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login UI Verification",
-      "baseTestName": "Login UI Verification",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 5299,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error messge verification: \"Email is not provided\"",
-      "baseTestName": "Login Error messge verification: \"Email is not provided\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8209,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"short Password\"",
-      "baseTestName": "Login Error message verification: \"short Password\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 14822,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error messge verification: \"Email is not provided\"",
-      "baseTestName": "Login Error messge verification: \"Email is not provided\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8245,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"short Password\"",
-      "baseTestName": "Login Error message verification: \"short Password\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 14737,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error messge verification: \"Email is not provided\"",
-      "baseTestName": "Login Error messge verification: \"Email is not provided\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 8356,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"Password not Provided\"",
-      "baseTestName": "Login Error message verification: \"Password not Provided\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 12968,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"not registered Email\"",
-      "baseTestName": "Login Error message verification: \"not registered Email\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 7902,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"Password not Provided\"",
-      "baseTestName": "Login Error message verification: \"Password not Provided\"",
-      "passed": false,
-      "skipped": false,
-      "failed": true,
-      "duration": 21262,
-      "error": "Can't call click on element with selector \"~nagasurendra-badri-69g23\" because element wasn't found",
-      "isSpanish": false,
-      "status": "broken"
-    },
-    {
-      "name": "Login Error message verification: \"wrong password\"",
-      "baseTestName": "Login Error message verification: \"wrong password\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 15956,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"wrong password\"",
-      "baseTestName": "Login Error message verification: \"wrong password\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 14401,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login UI Verification",
-      "baseTestName": "Login UI Verification",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 5327,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    },
-    {
-      "name": "Login Error message verification: \"not registered Email\"",
-      "baseTestName": "Login Error message verification: \"not registered Email\"",
-      "passed": true,
-      "skipped": false,
-      "failed": false,
-      "duration": 7901,
-      "error": null,
-      "isSpanish": false,
-      "status": "passed"
-    }
-  ],
-  "groupedTests": [
-    {
-      "index": 0,
-      "baseTestName": "Login Error message verification: \"invalid Email\"",
-      "english": {
-        "name": "Login Error message verification: \"invalid Email\"",
-        "baseTestName": "Login Error message verification: \"invalid Email\"",
-        "passed": true,
-        "skipped": false,
-        "failed": false,
-        "duration": 8518,
-        "error": null,
-        "isSpanish": false,
-        "status": "passed"
-      },
-      "spanish": null
-    },
-    {
-      "index": 1,
-      "baseTestName": "Login Error message verification: \"wrong password\"",
-      "english": {
-        "name": "Login Error message verification: \"wrong password\"",
-        "baseTestName": "Login Error message verification: \"wrong password\"",
-        "passed": true,
-        "skipped": false,
-        "failed": false,
-        "duration": 14401,
-        "error": null,
-        "isSpanish": false,
-        "status": "passed"
-      },
-      "spanish": null
-    },
-    {
-      "index": 2,
-      "baseTestName": "Login Error message verification: \"short Password\"",
-      "english": {
-        "name": "Login Error message verification: \"short Password\"",
-        "baseTestName": "Login Error message verification: \"short Password\"",
-        "passed": true,
-        "skipped": false,
-        "failed": false,
-        "duration": 14737,
-        "error": null,
-        "isSpanish": false,
-        "status": "passed"
-      },
-      "spanish": null
-    },
-    {
-      "index": 3,
-      "baseTestName": "Login UI Verification",
-      "english": {
-        "name": "Login UI Verification",
-        "baseTestName": "Login UI Verification",
-        "passed": true,
-        "skipped": false,
-        "failed": false,
-        "duration": 5327,
-        "error": null,
-        "isSpanish": false,
-        "status": "passed"
-      },
-      "spanish": null
-    },
-    {
-      "index": 4,
-      "baseTestName": "Login Error message verification: \"Password not Provided\"",
-      "english": {
-        "name": "Login Error message verification: \"Password not Provided\"",
-        "baseTestName": "Login Error message verification: \"Password not Provided\"",
-        "passed": false,
-        "skipped": false,
-        "failed": true,
-        "duration": 21262,
-        "error": "Can't call click on element with selector \"~nagasurendra-badri-69g23\" because element wasn't found",
-        "isSpanish": false,
-        "status": "broken"
-      },
-      "spanish": null
-    },
-    {
-      "index": 5,
-      "baseTestName": "Login Error message verification: \"not registered Email\"",
-      "english": {
-        "name": "Login Error message verification: \"not registered Email\"",
-        "baseTestName": "Login Error message verification: \"not registered Email\"",
-        "passed": true,
-        "skipped": false,
-        "failed": false,
-        "duration": 7901,
-        "error": null,
-        "isSpanish": false,
-        "status": "passed"
-      },
-      "spanish": null
-    },
-    {
-      "index": 6,
-      "baseTestName": "Login Error messge verification: \"Email is not provided\"",
-      "english": {
-        "name": "Login Error messge verification: \"Email is not provided\"",
-        "baseTestName": "Login Error messge verification: \"Email is not provided\"",
-        "passed": true,
-        "skipped": false,
-        "failed": false,
-        "duration": 8356,
-        "error": null,
-        "isSpanish": false,
-        "status": "passed"
-      },
-      "spanish": null
-    }
-  ],
-  "stats": {
-    "total": 21,
-    "passed": 20,
-    "failed": 1,
-    "skipped": 0
-  },
-  "meta": {
-    "platform": "iOS",
-    "reportDate": "2/16/2026, 7:23:14 AM",
-    "reportTimestamp": "2026-02-16T01:53:14.737Z"
-  }
-};
+        const REPORT_DATA = ${testDataJson};
         
         // Populate stats
         document.getElementById('platform').textContent = REPORT_DATA.meta.platform.toUpperCase();
@@ -650,18 +412,18 @@
                 : "- NOT RUN";
             
             const row = tbody.insertRow();
-            row.innerHTML = `
-                <td class="test-name">${group.baseTestName}</td>
-                <td class="status ${englishStatus}">${englishText}</td>
-                <td class="status ${spanishStatus}">${spanishText}</td>
+            row.innerHTML = \`
+                <td class="test-name">\${group.baseTestName}</td>
+                <td class="status \${englishStatus}">\${englishText}</td>
+                <td class="status \${spanishStatus}">\${spanishText}</td>
                 <td class="comment-cell">
                     <input type="text" 
                            class="comment-input" 
-                           data-test-index="${group.index}"
+                           data-test-index="\${group.index}"
                            placeholder="Add comment..." 
                            onchange="saveData()" />
                 </td>
-            `;
+            \`;
         });
         
         // Load saved comments
@@ -686,7 +448,7 @@
         }
         
         function exportToCSV() {
-            let csv = 'Test Case,English,Spanish,Comments\n';
+            let csv = 'Test Case,English,Spanish,Comments\\n';
             REPORT_DATA.groupedTests.forEach(group => {
                 const englishText = group.english
                     ? group.english.skipped ? "SKIPPED" : group.english.passed ? "PASS" : "FAIL"
@@ -696,10 +458,10 @@
                     ? group.spanish.skipped ? "SKIPPED" : group.spanish.passed ? "PASS" : "FAIL"
                     : "NOT RUN";
                 
-                const input = document.querySelector(`input[data-test-index="${group.index}"]`);
+                const input = document.querySelector(\`input[data-test-index="\${group.index}"]\`);
                 const comment = input ? input.value.replace(/,/g, ';').replace(/"/g, '""') : '';
                 
-                csv += `"${group.baseTestName}","${englishText}","${spanishText}","${comment}"\n`;
+                csv += \`"\${group.baseTestName}","\${englishText}","\${spanishText}","\${comment}"\\n\`;
             });
             
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -716,4 +478,19 @@
         window.addEventListener('load', loadData);
     </script>
 </body>
-</html>
+</html>`;
+
+// Write HTML file
+fs.writeFileSync(OUTPUT_FILE, html);
+
+console.log("\n========================================");
+console.log("✅ Report Generated Successfully!");
+console.log("========================================");
+console.log("📁 Location:", OUTPUT_FILE);
+console.log("📊 Total Tests:", testCases.length);
+console.log("✓ Passed:", testCases.filter((t) => t.passed).length);
+console.log("✗ Failed:", testCases.filter((t) => t.failed).length);
+console.log("⊗ Skipped:", testCases.filter((t) => t.skipped).length);
+console.log("========================================\n");
+
+console.log("🎉 Done! Open the file in your browser to view the report.\n");
