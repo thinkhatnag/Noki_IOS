@@ -5,7 +5,6 @@ import {
   aeroplaneModeOn,
   aeroplaneModeOff,
   playTTS,
-  LiveTranscript,
   validate,
 } from "../../helpers/helper.js";
 import AudioManager from "../screenObjectModel/audioManeger.js";
@@ -16,6 +15,7 @@ import RecordingPage from "../screenObjectModel/recording.page.js";
 import HomePage from "../screenObjectModel/home.page.js";
 import EncounterPage from "../screenObjectModel/encounter.page.js";
 import AudioManeger from "../screenObjectModel/audioManeger.js";
+import allureReporter from "@wdio/allure-reporter";
 class SpanishLanguage {
   get Done() {
     return $("~Done");
@@ -23,7 +23,7 @@ class SpanishLanguage {
 
   get newUserREsgistrationText() {
     return $(
-      "~¿Nuevo usuario? Por favor, visita el sitio web de Noki para crear una nueva cuenta."
+      "~¿Nuevo usuario? Por favor, visita el sitio web de Noki para crear una nueva cuenta.",
     );
   }
   get emailField() {
@@ -40,7 +40,7 @@ class SpanishLanguage {
   }
   get WrongPassword() {
     return $(
-      "~La contraseña no es válida o el usuario no tiene una contraseña."
+      "~La contraseña no es válida o el usuario no tiene una contraseña.",
     );
   }
   get emailError() {
@@ -54,7 +54,7 @@ class SpanishLanguage {
   }
   get emailNotRegisteredError() {
     return $(
-      "~No hay ninguna cuenta asociada con la dirección de correo electrónico"
+      "~No hay ninguna cuenta asociada con la dirección de correo electrónico",
     );
   }
   get shortPassword() {
@@ -80,7 +80,7 @@ class SpanishLanguage {
   }
   get sendResetLinkBtn() {
     return $(
-      '//XCUIElementTypeButton[@name="Enviar enlace de restablecimiento"]'
+      '//XCUIElementTypeButton[@name="Enviar enlace de restablecimiento"]',
     );
   }
   get loginLink() {
@@ -91,7 +91,7 @@ class SpanishLanguage {
   }
   get successMessageForResetLink() {
     return $(
-      "~El enlace para restablecer la contraseña ha sido enviado correctamente a su correo electrónico."
+      "~El enlace para restablecer la contraseña ha sido enviado correctamente a su correo electrónico.",
     );
   }
 
@@ -99,13 +99,21 @@ class SpanishLanguage {
   async enterEmail(email) {
     await verifyAndClick(this.emailField);
     await this.emailField.setValue(email);
-    await verifyAndClick(this.Done);
+    if (await this.doneBtn.isDisplayed()) {
+      await this.doneBtn.click();
+    } else if (await LoginPage.Next.isDisplayed()) {
+      await LoginPage.Next.click();
+    }
   }
 
   async enterPassword(password) {
     await verifyAndClick(this.passwordField);
     await this.passwordField.setValue(password);
-    await this.Done.click();
+    if (await this.doneBtn.isDisplayed()) {
+      await this.doneBtn.click();
+    } else if (await LoginPage.Next.isDisplayed()) {
+      await LoginPage.Next.click();
+    }
   }
 
   async clickLogin() {
@@ -124,8 +132,11 @@ class SpanishLanguage {
   async enterForgotPasswordEmail(email) {
     await verifyAndClick(this.forgotPasswordEmailField);
     await this.forgotPasswordEmailField.setValue(email);
-    await verifyAndClick(this.doneBtn);
-    await verifyAndClick(this.sendResetLinkBtn);
+    if (await this.doneBtn.isDisplayed()) {
+      await this.doneBtn.click();
+    } else if (await LoginPage.Next.isDisplayed()) {
+      await LoginPage.Next.click();
+    } // await verifyAndClick(this.sendResetLinkBtn);
   }
 
   get profileSettings() {
@@ -190,7 +201,7 @@ class SpanishLanguage {
     return $('(//XCUIElementTypeStaticText[@name="LanguageSettingTVC"])[1]');
   }
   get spanish() {
-    return $("~Español");
+    return $("~Spanish");
   }
   get edit() {
     return $("~Editar");
@@ -200,7 +211,7 @@ class SpanishLanguage {
   }
   get firstNameTextField() {
     return $(
-      "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[1]"
+      "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[1]",
     );
   }
   get middleName() {
@@ -208,7 +219,7 @@ class SpanishLanguage {
   }
   get middleNameTextField() {
     return $(
-      "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[2]"
+      "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[2]",
     );
   }
   get lastName() {
@@ -216,7 +227,7 @@ class SpanishLanguage {
   }
   get lastNameTextField() {
     return $(
-      "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[3]"
+      "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[3]",
     );
   }
   get home() {
@@ -296,7 +307,7 @@ class SpanishLanguage {
   }
   get enterSpcificSpecialityTextField() {
     return $(
-      `//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[4]`
+      `//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeTextField[4]`,
     );
   }
   get specialityDropDown() {
@@ -401,7 +412,7 @@ class SpanishLanguage {
     });
     if (gmailAppState !== 4) {
       throw new Error(
-        `Gmail (${gmailBundleId}) is not active. Current app state: ${gmailAppState}`
+        `Gmail (${gmailBundleId}) is not active. Current app state: ${gmailAppState}`,
       );
     }
     console.log("Gmail is active");
@@ -422,7 +433,7 @@ class SpanishLanguage {
     });
     if (messagesAppState !== 4) {
       throw new Error(
-        `Messages (${messagesBundleId}) is not active. Current app state: ${messagesAppState}`
+        `Messages (${messagesBundleId}) is not active. Current app state: ${messagesAppState}`,
       );
     }
     console.log("Messages is active");
@@ -552,7 +563,7 @@ class SpanishLanguage {
 
   get emailConfigurationTxt() {
     return $(
-      "Configura los ajustes de tu correo electrónico para asegurarte de que puedes enviar correos electrónicos"
+      "Configura los ajustes de tu correo electrónico para asegurarte de que puedes enviar correos electrónicos",
     );
   }
   get emailConfigurationOk() {
@@ -608,7 +619,7 @@ class SpanishLanguage {
   }
   get draft() {
     return $(
-      '**/XCUIElementTypeStaticText[`name == "Borrador de transcripción"`][1]'
+      '**/XCUIElementTypeStaticText[`name == "Borrador de transcripción"`][1]',
     );
   }
   get deleteBtn() {
@@ -689,9 +700,9 @@ class SpanishLanguage {
     return $(`//XCUIElementTypePickerWheel[@value="${formattedMonth}"]`);
   }
   get yearPicker() {
-    return $('//XCUIElementTypePickerWheel[@value="2025"]');
+    const currentYear = new Date().getFullYear().toString();
+    return $(`//XCUIElementTypePickerWheel[@value="${currentYear}"]`);
   }
-
   get ok() {
     return $("~Ok");
   }
@@ -766,7 +777,7 @@ class SpanishLanguage {
   }
   get TxtConfm() {
     return $(
-      "~Por favor, asegúrese de tener el consentimiento verbal del paciente antes de usar el escriba ambiental de IA de Noki para la documentación clínica. Ver Consentimiento."
+      "~Por favor, asegúrese de tener el consentimiento verbal del paciente antes de usar el escriba ambiental de IA de Noki para la documentación clínica. Ver Consentimiento.",
     );
   }
   get pauseBtn() {
@@ -788,7 +799,7 @@ class SpanishLanguage {
       year: "numeric",
     });
     return $(
-      `~Al reanudar, la conversación en curso será grabada y la transcripción borrador se actualizará bajo el encuentro con fecha ${date}. ¿Está seguro de que desea continuar?`
+      `~Al reanudar, la conversación en curso será grabada y la transcripción borrador se actualizará bajo el encuentro con fecha ${date}. ¿Está seguro de que desea continuar?`,
     );
   }
 
@@ -804,7 +815,7 @@ class SpanishLanguage {
   }
   get PrevEncounterRef() {
     return $(
-      "~¿Le gustaría usar la nota SOAP del encuentro anterior como contexto?"
+      "~¿Le gustaría usar la nota SOAP del encuentro anterior como contexto?",
     );
   }
   get PrevEncounterRefNo() {
@@ -933,13 +944,13 @@ class SpanishLanguage {
 
   get originalTrnscript() {
     return $(
-      '//XCUIElementTypeStaticText[@name="Mostrar Transcripción Original"]'
+      '//XCUIElementTypeStaticText[@name="Mostrar Transcripción Original"]',
     );
   }
 
   get claeanedTranscript() {
     return $(
-      '//XCUIElementTypeStaticText[@name="Mostrar Transcripción Limpiada"]'
+      '//XCUIElementTypeStaticText[@name="Mostrar Transcripción Limpiada"]',
     );
   }
 
@@ -974,7 +985,7 @@ class SpanishLanguage {
   }
   get SoapNoteScreenTxtField() {
     return $(
-      '//XCUIElementTypeTextView[@value="Haz clic en el micrófono y comienza a hablar.."]'
+      '//XCUIElementTypeTextView[@value="Haz clic en el micrófono y comienza a hablar.."]',
     );
   }
   // get SoapNoteTxtField()
@@ -992,7 +1003,7 @@ class SpanishLanguage {
   }
   get finaliseEncounterTxt() {
     return $(
-      "~¿Está seguro de finalizar el encuentro y deshabilitar todas las acciones disponibles?"
+      "~¿Está seguro de finalizar el encuentro y deshabilitar todas las acciones disponibles?",
     );
   }
   get finaliseEncounterOk() {
@@ -1153,12 +1164,12 @@ class SpanishLanguage {
 
   get PatientInformationTxtInEnlish() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]',
     );
   }
-  get PatientInformationTxtOnSpanish() {
+  get PatientInformationTxtInSpanish() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Información del Paciente"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Información del Paciente"]',
     );
   }
 
@@ -1171,7 +1182,7 @@ class SpanishLanguage {
   }
   get RecordingContinueBtn() {
     return $(
-      '-ios class chain:**/XCUIElementTypeButton[`name == "CONTINUAR"`]'
+      '-ios class chain:**/XCUIElementTypeButton[`name == "CONTINUAR"`]',
     );
   }
 
@@ -1180,7 +1191,7 @@ class SpanishLanguage {
   }
   get offlineConversationSaved() {
     return $(
-      "~Hemos guardado tu conversación. Se sincronizará cuando vuelvas a estar conectado."
+      "~Hemos guardado tu conversación. Se sincronizará cuando vuelvas a estar conectado.",
     );
   }
   get() {
@@ -1328,16 +1339,21 @@ class SpanishLanguage {
     await verifyAndClick(this.printPageCancel);
     await verifyAndClick(this.printPageBackBtn);
   }
+   async selectRandomGender() {
+    const options = [this.male, this.female, this.other, this.unknown];
+
+    await this.genderPicker.click();
+    await options[Math.floor(Math.random() * options.length)].click();
+  }
 
   //AddPatitent Screen Functions
   async createNewPatient() {
-    const name = faker.person.fullName();
-    const cleanName = name.replace(/[^a-zA-Z0-9 ]/g, "");
-
+    let name = faker.person.fullName();
+    name = name.replace(/[^a-zA-Z0-9 ]/g, "").trim();
     const year = faker.number.int({ min: 1920, max: 2023 });
     const month = faker.number.int({ min: 1, max: 12 });
     await verifyAndClick(this.newpatientName);
-    await this.newpatientName.setValue(cleanName);
+    await this.newpatientName.setValue(name);
     await this.dobPicker.click();
     await this.previousMonth.click();
     await this.nextMonth.click();
@@ -1346,15 +1362,7 @@ class SpanishLanguage {
     await this.monthPicker.setValue(month);
     await this.yearPickerHide.click();
     await this.COK.click();
-    await this.genderPicker.click();
-    await verifyAndClick(this.female);
-    await this.genderPicker.click();
-    await verifyAndClick(this.other);
-    await this.genderPicker.click();
-    await verifyAndClick(this.unknown);
-    await this.genderPicker.click();
-    await this.male.click();
-    await verify(this.cancel);
+    await this.selectRandomGender();
     await verifyAndClick(this.addAndProceed);
     await RecordingPage.ok.click();
     return name;
@@ -1427,7 +1435,7 @@ class SpanishLanguage {
   async recordAudio() {
     await driver.pause(4000);
     await AudioManeger.playAudio("spanish");
-    await driver.pause(80000);
+    await driver.pause(60000);
     await AudioManeger.stopAudio();
     await verifyAndClick(this.pauseBtn);
     await verifyAndClick(this.stopBtn);
@@ -1438,11 +1446,10 @@ class SpanishLanguage {
     await driver.pause(5000);
     await aeroplaneModeOn();
     await driver.pause(5000);
-    await verify(this.offlineModeRTranscription);
+    await verify(this.offlineModeTranscription);
     await driver.pause(40000);
     await aeroplaneModeOff();
     await driver.pause(5000);
-    await LiveTranscript();
     await driver.pause(20000);
     await AudioManeger.stopAudio();
     await verifyAndClick(this.pauseBtn);
@@ -1451,7 +1458,7 @@ class SpanishLanguage {
   async CDSS_verification() {
     if (await this.notEnoughTranscript.isDisplayed()) {
       console.error(
-        "Recording failed: Please provide a proper medical conversation"
+        "Recording failed: Please provide a proper medical conversation",
       );
     } else {
       await waitForElement(this.SoapNoteBtn);
@@ -1472,7 +1479,7 @@ class SpanishLanguage {
     } else if (this.CDSSLimitExceded.isDisplayed()) {
       console.error(
         "\x1b[31m%s\x1b[0m",
-        "Kindly please verify the CDSS is off / your CDSS subscription is over"
+        "Kindly please verify the CDSS is off / your CDSS subscription is over",
       );
     }
     await driver.pause(3000);
@@ -1488,6 +1495,17 @@ class SpanishLanguage {
   async SOAPNOTE_Verification() {
     await waitForElement(this.quickActionButton);
     await this.SoapNoteBtn.click();
+    // if (!(await this.PatientInformationTxtInSpanish.isDisplayed())) {
+    //   allureReporter.addIssue(
+    //     "In mobile default clinical note lauguage button is not implemented. so as per web the clinical note/soap note is English we are translating to Spanish"
+    //   );
+    //   await verifyAndClick(this.quickActionButton);
+    //   await this.translate_SoapNoteToSpanish();
+    // } else {
+    //   console.log(
+    //     "Default clinical launguge option is there in Noki Mobile now."
+    //   );
+    // }
     await this.copyMailPrint();
   }
 
@@ -1522,7 +1540,7 @@ class SpanishLanguage {
   }
   async clickDraftTranscript() {
     const drafts = await $$(
-      '-ios class chain:**/XCUIElementTypeStaticText[`name == "Borrador de transcripción"`]'
+      '-ios class chain:**/XCUIElementTypeStaticText[`name == "Borrador de transcripción"`]',
     );
 
     if (drafts.length > 0) {
@@ -1552,7 +1570,7 @@ class SpanishLanguage {
     await verifyAndClick(this.COK);
     await verifyAndClick(this.resumeConversationForMultipleConverstionScenario);
     await verifyAndClick(
-      this.resumeConversationForMultipleConverstionScenarioYes
+      this.resumeConversationForMultipleConverstionScenarioYes,
     );
     await this.recordAudio();
   }
@@ -1611,14 +1629,14 @@ class SpanishLanguage {
     await driver.pause(5000);
     await verifyAndClick(this.Continue);
     console.log(
-      "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
+      "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page",
     );
     await AudioManeger.resumeAudio();
     await driver.pause(30000);
     await AudioManeger.stopAudio();
     await verifyAndClick(this.stopBtn);
     console.log(
-      "here after app got closed while recording we magaing automatically again resumed the audio"
+      "here after app got closed while recording we magaing automatically again resumed the audio",
     );
     await driver.pause(5000);
     await verify(this.offlineConversationSaved);
@@ -1640,16 +1658,16 @@ class SpanishLanguage {
       .perform();
     await driver.pause(5000);
     console.log(
-      "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved"
+      "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved",
     );
     if (this.PrevEncounterRefNo.isDisplayed()) {
       await this.PrevEncounterRefNo.click();
       console.log(
-        "Here her are undrgoing conversation may be s followup or the patient is visted the doctor previously"
+        "Here her are undrgoing conversation may be s followup or the patient is visted the doctor previously",
       );
     } else {
       console.log(
-        "This conversation we are recording for this particulat patient is for the First time"
+        "This conversation we are recording for this particulat patient is for the First time",
       );
     }
   }
@@ -1672,8 +1690,8 @@ class SpanishLanguage {
   async bloodGroup(text) {
     return await waitForElement(
       $(
-        `//XCUIElementTypeStaticText[@name="main label" and @label="${text} : "]`
-      )
+        `//XCUIElementTypeStaticText[@name="main label" and @label="${text} : "]`,
+      ),
     );
   }
 
@@ -1682,12 +1700,12 @@ class SpanishLanguage {
   }
   get titleTextField() {
     return $(
-      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[1]'
+      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[1]',
     );
   }
   get discriptionTextField() {
     return $(
-      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[2]'
+      '//XCUIElementTypeOther[@name="Stack view"]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[2]',
     );
   }
   async UpdatePatientInfo() {
@@ -1708,7 +1726,7 @@ class SpanishLanguage {
 
   get SoapNoteScreenTxtFieldEntry() {
     return $(
-      '//XCUIElementTypeApplication[@name="Noki-T"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther/XCUIElementTypeTextView"]'
+      "-ios class chain:**/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther",
     );
   }
 
@@ -1716,9 +1734,9 @@ class SpanishLanguage {
     await waitForElement(this.SoapNoteScreenTxtField);
     await verifyAndClick(this.SoapNoteScreenTxtField);
     await this.SoapNoteScreenTxtFieldEntry.setValue(
-      "Grupo sanguíneo O postivo"
+      "Grupo sanguíneo O postivo",
     );
-    await verifyAndClick(this.doneBtn);
+    // await verifyAndClick(this.doneBtn);
     await verifyAndClick(this.send);
     await waitForElement(this.COK);
     await verifyAndClick(this.COK);
@@ -1733,7 +1751,7 @@ class SpanishLanguage {
     await waitForElement(this.Mic);
     await verifyAndClick(this.Mic);
     await driver.pause(2000);
-    await playTTS("Grupo sanguíneo O negativo", "Alex", 0.8);
+    await playTTS("Grupo sanguíneo B negativo", "Juan", 1.0);
     await driver.pause(2000);
     await verifyAndClick(this.MicStop);
     await verifyAndClick(this.send);
@@ -1741,7 +1759,7 @@ class SpanishLanguage {
     await validate(this.COK);
     await verifyAndClick(this.COK);
     await this.bloodGroup("Grupo sanguíneo");
-    await this.bloodName("O negativo");
+    await this.bloodName("B negativo");
   }
 }
 export default new SpanishLanguage();

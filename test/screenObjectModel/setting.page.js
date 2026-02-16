@@ -236,6 +236,7 @@ class SettingsPage {
     await $(`~Other`).click();
     await verifyAndClick(this.enterSpcificSpecialityTextField);
     await driver.execute("mobile: swipe", { direction: "down" });
+        await driver.execute("mobile: swipe", { direction: "down" });
     await verifyAndClick(this.firstNameTextField);
     await verifyAndClick(this.keyboardClose);
     await verifyAndClick(this.save);

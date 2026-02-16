@@ -48,76 +48,6 @@ class AudioManager {
     }, 1000);
   }
 
-  async LiveTranscript(language = "english", checkInterval = 2000) {
-    const TRANSCRIPT_SELECTOR = "//XCUIElementTypeTextView";
-    const englishOffline = await RecordingPage.offlineModeRTranscription;
-    const spanishOffline = await SpanishLanguage.offlineModeTranscription;
-
-    const OFFLINE_SELECTORS = {
-      english: englishOffline,
-      spanish: spanishOffline,
-    };
-
-    const offlineSelector = OFFLINE_SELECTORS[language];
-
-    let previousText = "";
-    this._monitoring = true;
-
-    (async () => {
-      while (this._monitoring) {
-        try {
-          const offlineElements = await $$(offlineSelector);
-          if (offlineElements.length > 0) {
-            allureReporter.addStep(
-              `⚠️ Device offline detected (${language}), stopping live transcript monitoring`,
-              {},
-              "broken"
-            );
-            break;
-          }
-
-          const transcriptElement = await $(TRANSCRIPT_SELECTOR);
-          const currentText = await transcriptElement.getText();
-
-          if (currentText && currentText.trim() !== previousText) {
-            previousText = currentText;
-            allureReporter.addStep(
-              `✅ Live transcript updated (${language})`,
-              { text: currentText.slice(0, 500) },
-              "passed"
-            );
-          } else {
-            allureReporter.addStep(
-              `⚠️ Live transcript not updated yet (${language})`,
-              { lastText: previousText.slice(0, 500) },
-              "broken"
-            );
-          }
-
-          const audioPlayedTime =
-            this.playedTime +
-            (this.isPaused ? 0 : Date.now() / 1000 - this.startTime);
-          if (audioPlayedTime >= this.maxDuration) {
-            this._monitoring = false;
-            allureReporter.addStep(
-              `⏹️ Audio finished (${language}), stopping live transcript monitoring`,
-              {},
-              "passed"
-            );
-            break;
-          }
-
-          await driver.pause(checkInterval);
-        } catch (err) {
-          allureReporter.addStep(
-            `❌ Error reading live transcript (${language})`,
-            { error: err.message },
-            "failed"
-          );
-        }
-      }
-    })();
-  }
 
   async playAudio(language) {
     const audioFilePath = this.audioFiles[language];
@@ -231,8 +161,7 @@ class AudioManager {
     }
     return logFile;
   }
-  // textComparison.js
-  // Auto-fetch latest scanned and played transcript files, compare with threshold
+
 
   async TextComparison() {
     const SCANNED_DIR = "/Users/nagasubarayudu/Desktop/IOS/_results_/";

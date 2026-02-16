@@ -1,19 +1,77 @@
 import { EventEmitter } from "events";
 import fsExtra from "fs-extra"; // Import the default export
-import allure from "allure-commandline"; // Import allure-commandline
+// import allure from "allure-commandline"; // Import allure-commandline
 const { removeSync } = fsExtra; // Destructure removeSync
-import { exec } from "child_process";
-import allureReporter from "@wdio/allure-reporter";
+// import allureReporter from "@wdio/allure-reporter";
 import dotenv from "dotenv";
-// import { getEnvironmentData } from "worker_threads";
+import fs from "node:fs";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import path from "node:path";
+import { execSync, exec } from "node:child_process";
+import { fileURLToPath } from "url";
+import glob from "glob";
 
 const env = process.env.TEST_ENV; // must be set via bash command
 dotenv.config({ path: `.env.${env}` });
 
 console.log(`Running tests in '${env}' environment`);
+let reportAggregator;
 
 EventEmitter.defaultMaxListeners = 50;
+import WDIOReporter from "@wdio/reporter";
 
+class CustomTestReporter extends WDIOReporter {
+  constructor(options) {
+    super(options);
+    if (!global.testResults) {
+      global.testResults = [];
+    }
+    console.log("\n[CustomReporter] ✓ Initialized\n");
+  }
+
+  onTestPass(test) {
+    console.log(`[CustomReporter] ✓ PASS: "${test.title}"`);
+    this.captureTest(test, true, false);
+  }
+
+  onTestFail(test) {
+    console.log(`[CustomReporter] ✗ FAIL: "${test.title}"`);
+    this.captureTest(test, false, false);
+  }
+
+  onTestSkip(test) {
+    console.log(`[CustomReporter] ⊗ SKIP: "${test.title}"`);
+    this.captureTest(test, false, true);
+  }
+
+  captureTest(test, passed, skipped) {
+    const isSpanish =
+      test.title.includes("-Es") ||
+      test.title.includes("_Es") ||
+      test.title.includes(" Es ");
+
+    const baseTestName = test.title.replace(/-Es|_Es| Es /gi, "").trim();
+
+    global.testResults.push({
+      name: test.title,
+      baseTestName: baseTestName,
+      passed: passed,
+      skipped: skipped,
+      duration: test.duration || 0,
+      error: test.error ? test.error.message : null,
+      isSpanish: isSpanish,
+    });
+
+    console.log(`[CustomReporter] Total: ${global.testResults.length}\n`);
+  }
+
+  onRunnerEnd() {
+    console.log(
+      `\n[CustomReporter] ✓ Complete. Total: ${global.testResults.length}\n`,
+    );
+  }
+}
 export const config = {
   //
   // ====================
@@ -41,9 +99,9 @@ export const config = {
   // of the config file unless it's absolute.
   //
   specs: [
+    // "./test/spec/English/home.spec.js",
     // "./test/spec/English/Forgot_Password.spec.js",
-    // "./test/spec/English/Login.spec.js",
-    // // "./test/spec/English/home.spec.js",
+    "./test/spec/English/Login.spec.js",
     // "./test/spec/English/Setting.spec.js",
     // "./test/spec/English/New_Patient.spec.js",
     // "./test/spec/English/Existing_Patient.spec.js",
@@ -51,7 +109,7 @@ export const config = {
     // "./test/spec/Spanish/Login_Es.spec.js",
     // "./test/spec/Spanish/Settings_ES.spec.js",
     // "./test/spec/Spanish/New_Patient_ES.spec.js",
-    "./test/spec/Spanish/Existing_Patient_ES.spec.js",
+    // "./test/spec/Spanish/Existing_Patient_ES.spec.js",
     // './test/spec/Test.spec.js',
   ],
   // Patterns to exclude.
@@ -89,6 +147,8 @@ export const config = {
       // "platformVersion": "16.7.8",
       //"deviceName": "iPhone 15 Pro Max",
       "appium:deviceName": "iPhone 16",
+      "appium:wdaLocalPort": 8100,
+
       //"deviceName": "iPad (5th generation)",
       "appium:platformVersion": "18.7.2",
       // "deviceName": "iPhone 12",\
@@ -106,8 +166,7 @@ export const config = {
       //"udid": "BEAE10F4-8353-4B1C-B2D2-8E0C9D2F5DC1",//simulator
       //"udid": "00008110-000165DE22E9801E",//Iphone 13 Pro Max
       // "appium:autoAcceptAlerts": true,
-      "appium:udid:forceAppLaunch": true,
-      "appium:udid: bundleId": process.env.BUNDLE_ID,
+      "appium:forceAppLaunch": true,
 
       //"bundleId": "com.thinkhat.devNoki",
       //"connectHardwareKeyboard": true,
@@ -171,6 +230,7 @@ export const config = {
         },
       },
     ],
+
     //     [
     //         'visual',
     //         {
@@ -206,6 +266,15 @@ export const config = {
   // see also: https://webdriver.io/docs/dot-reporter
   reporters: [
     "spec",
+    [
+      "html-nice",
+      {
+        outputDir: "./reports/html-reports/",
+        filename: "report.html",
+        reportTitle: "NOKI IOS Test Report",
+        useOnAfterCommandForScreenshot: false,
+      },
+    ],
     [
       "allure",
       {
@@ -243,11 +312,12 @@ export const config = {
    * Gets executed once before all workers get launched.
    * @param {object} _config wdio configuration object
    * @param {Array.<Object>} _capabilities list of capabilities details
-   */
-  // onPrepare: function (_config, _capabilities) {
-  //     console.log('Cleaning up old allure results...');
-  //     removeSync('./allure-results'); // Automatically remove old results
-  // },
+  //  */
+  onPrepare: function (config, capabilities) {
+    global.testResults = [];
+    console.log("\n[Reporter] Initializing test results array...\n");
+  },
+
   /**
    * Gets executed before a worker process is spawned and can be used to initialize specific service
    * for that worker as well as modify runtime environments in an async fashion.
@@ -304,35 +374,35 @@ export const config = {
    * Function to be executed before a test (in Mocha/Jasmine) starts.
    */
 
-  beforeTest(test) {
-    const title = test.title.toLowerCase();
+  // beforeTest(test) {
+  //   const title = test.title.toLowerCase();
 
-    // ---------- LANGUAGE ----------
-    const language = title.includes("-es") ? "Spanish" : "English";
+  //   // ---------- LANGUAGE ----------
+  //   const language = /-es/i.test(title) ? "Spanish" : "English";
 
-    // ---------- POSITIVE / NEGATIVE (classification only) ----------
-    const negativeWords = [
-      "error",
-      "fail",
-      "offline",
-      "invalid",
-      "denied",
-      "killed",
-      "timeout",
-    ];
+  //   // ---------- POSITIVE / NEGATIVE (classification only) ----------
+  //   const negativeWords = [
+  //     "error",
+  //     "fail",
+  //     "offline",
+  //     "invalid",
+  //     "denied",
+  //     "killed",
+  //     "timeout",
+  //   ];
 
-    const type = negativeWords.some((w) => title.includes(w))
-      ? "Negative"
-      : "Positive";
+  //   const type = negativeWords.some((w) => title.includes(w))
+  //     ? "Negative"
+  //     : "Positive";
 
-    // ---------- ALLURE STRUCTURE ----------
-    allureReporter.addEpic("Noki iOS Mobile"); // Application
-    allureReporter.addParentSuite(language); // English / Spanish
+  //   // ---------- ALLURE STRUCTURE ----------
+  //   allureReporter.addEpic("Noki iOS Mobile"); // Application
+  //   allureReporter.addParentSuite(language); // English / Spanish
 
-    // ---------- FILTER LABELS ----------
-    allureReporter.addLabel("language", language);
-    allureReporter.addLabel("type", type);
-  },
+  //   // ---------- FILTER LABELS ----------
+  //   allureReporter.addLabel("language", language);
+  //   allureReporter.addLabel("type", type);
+  // },
 
   /**
    * Hook that gets executed _before_ a hook within the suite starts (e.g. runs before calling
@@ -356,17 +426,64 @@ export const config = {
    * @param {boolean} result.passed    true if test has passed, otherwise false
    * @param {object}  result.retries   information about spec related retries, e.g. `{ attempts: 0, limit: 0 }`
    */
-  afterTest: async function (test, context, { error, passed }) {
-    if (!passed) {
-      const screenshot = await browser.takeScreenshot();
-      allureReporter.addAttachment(
-        "Screenshot on Failure",
-        Buffer.from(screenshot, "base64"),
-        "image/png"
-      );
-    }
-  },
+  //  afterTest: async function(test, context, { error, result, duration, passed, retries }) {
+  //       if (!global.testResults) {
+  //           global.testResults = [];
+  //       }
 
+  //       // Auto-detect Spanish tests: looks for -Es, _Es, or Es (space before)
+  //       const isSpanish = test.title.includes('-Es') || test.title.includes('_Es') || test.title.includes(' Es ');
+
+  //       // Remove language suffix to get base test name for grouping
+  //       const baseTestName = test.title.replace(/-Es|_Es| Es /gi, '').trim();
+
+  //       global.testResults.push({
+  //           name: test.title,
+  //           baseTestName: baseTestName,
+  //           passed: passed,
+  //           skipped: test.pending || false,  // Detects skipped tests
+  //           duration: duration,
+  //           error: error ? error.message : null,
+  //           isSpanish: isSpanish
+  //       });
+  //   },
+  afterTest: async function (
+    test,
+    context,
+    { error, result, duration, passed, retries },
+  ) {
+    // DEBUG: Check if hook fires
+    console.log("\n╔══════════════════════════════════════╗");
+    console.log("║  afterTest HOOK FIRED!              ║");
+    console.log("╚══════════════════════════════════════╝");
+    console.log("Test:", test.title);
+    console.log("Passed:", passed);
+
+    if (!global.testResults) {
+      global.testResults = [];
+      console.log("✓ Initialized global.testResults");
+    }
+
+    const isSpanish =
+      test.title.includes("-Es") ||
+      test.title.includes("_Es") ||
+      test.title.includes(" Es ");
+
+    const baseTestName = test.title.replace(/-Es|_Es| Es /gi, "").trim();
+
+    global.testResults.push({
+      name: test.title,
+      baseTestName: baseTestName,
+      passed: passed,
+      skipped: test.pending || false,
+      duration: duration,
+      error: error ? error.message : null,
+      isSpanish: isSpanish,
+    });
+
+    console.log("✓ Pushed. Total:", global.testResults.length);
+    console.log("═══════════════════════════════════════\n");
+  },
   /**    idevicesyslog
    * Hook that gets executed after the suite has ended
    * @param {object} suite suite details
@@ -380,97 +497,56 @@ export const config = {
    * @param {number} result 0 - command success, 1 - command error
    * @param {object} error error object if any
    */
-
-  // onComplete: function (_exitCode, _config, _capabilities, _results) {
-  //   return new Promise((resolve, reject) => {
-  //     const generation = allure(["generate", "allure-results", "--clean"]);
-  //     const generationTimeout = setTimeout(
-  //       () => reject(new Error("Could not generate Allure report")),
-  //       10000
-  //     );
-
-  //     generation.on("exit", function (exitCode) {
-  //       clearTimeout(generationTimeout);
-  //       if (exitCode !== 0) {
-  //         return reject(new Error("Could not generate Allure report"));
-  //       }
-  //       console.log("Allure report successfully generated");
-  //       resolve();
-  //     });
-  //   });
-  // },
-
-  /**
-   * Gets executed after all tests are done. You still have access to all global variables from
-   * the test.
-   * @param {number} result 0 - test pass, 1 - test fail
-   * @param {Array.<Object>} capabilities list of capabilities details
-   * @param {Array.<String>} specs List of spec file paths that ran
-   */
-  // after: function (result, capabilities, specs) {
-  // },
-  /**
-   * Gets executed right after terminating the webdriver session.
-   * @param {object} config wdio configuration object
-   * @param {Array.<Object>} capabilities list of capabilities details
-   * @param {Array.<String>} specs List of spec file paths that ran
-   */
-  // afterSession: function (config, capabilities, specs) {
-  // },
-  /**
-   * Gets executed after all workers got shut down and the process is about to exit. An error
-   * thrown in the onComplete hook will result in the test run failing.
-   * @param {object} _exitCode 0 - success, 1 - fail
-   * @param {object} _config wdio configuration object
-   * @param {Array.<Object>} _capabilities list of capabilities details
-   * @param {<Object>} _results object containing test results
-   */
-
-  onComplete: async function (_exitCode, _config, _capabilities, _results) {
-    const reportError = new Error("❌ Could not generate Allure report");
-    const generation = allure(["generate", "allure-results", "--clean"]);
-    await new Promise((resolve, reject) => {
-      generation.on("exit", (exitCode) => {
-        if (exitCode !== 0) return reject(reportError);
-        console.log("✅ Allure report generated");
-        resolve();
-      });
-    });
-
-    exec(`allure open`, (err) => {
-      if (err)
-        console.error("⚠️ Failed to open Allure report automatically:", err);
-      else console.log("🌐 Allure report opened in browser");
-    });
-
-    // const reportPath = "./reports/html-reports/report.html";
-    // if (!fs.existsSync(reportPath)) {
-    //   console.warn("⚠️ No HTML report found, did tests run?");
-    // } else {
-    //   exec(`open ${reportPath}`, (err) => {
-    //     if (err)
-    //       console.error("⚠️ Failed to open HTML report automatically:", err);
-    //     else console.log(`🌐 HTML report opened: ${reportPath}`);
-    //   });
+  onComplete: function (exitCode, config, capabilities, results) {
+    console.log("\n✅ Tests completed!");
+    console.log("📊 Run: node generate-report.js");
+    console.log("🚀 Deploy: ./deploy-reports.sh\n");
   },
-
-  /**
-   * Gets executed when a refresh happens.
-   * @param {string} oldSessionId session ID of the old session
-   * @param {string} newSessionId session ID of the new session
-   */
-  // onReload: function(oldSessionId, newSessionId) {
-  // }
-  /**
-   * Hook that gets executed before a WebdriverIO assertion happens.
-   * @param {object} params information about the assertion to be executed
-   */
-  // beforeAssertion: function(params) {
-  // }
-  /**
-   * Hook that gets executed after a WebdriverIO assertion happened.
-   * @param {object} params information about the assertion that was executed, including its results
-   */
-  // afterAssertion: function(params) {
-  // }
 };
+/**
+ * Gets executed after all tests are done. You still have access to all global variables from
+ * the test.
+ * @param {number} result 0 - test pass, 1 - test fail
+ * @param {Array.<Object>} capabilities list of capabilities details
+ * @param {Array.<String>} specs List of spec file paths that ran
+ */
+// after: function (result, capabilities, specs) {
+// },
+/**
+ * Gets executed right after terminating the webdriver session.
+ * @param {object} config wdio configuration object
+ * @param {Array.<Object>} capabilities list of capabilities details
+ * @param {Array.<String>} specs List of spec file paths that ran
+ */
+// afterSession: function (config, capabilities, specs) {
+// },
+/**
+ * Gets executed after all workers got shut down and the process is about to exit. An error
+ * thrown in the onComplete hook will result in the test run failing.
+ * @param {object} _exitCode 0 - success, 1 - fail
+ * @param {object} _config wdio configuration object
+ * @param {Array.<Object>} _capabilities list of capabilities details
+ * @param {<Object>} _results object containing test results
+ */
+// COMPLETE FIX for wdio.conf.js onComplete hook
+// Replace your entire onComplete function (around line 490-500) with this:
+
+/**
+ * Gets executed when a refresh happens.
+ * @param {string} oldSessionId session ID of the old session
+ * @param {string} newSessionId session ID of the new session
+ */
+// onReload: function(oldSessionId, newSessionId) {
+// }
+/**
+ * Hook that gets executed before a WebdriverIO assertion happens.
+ * @param {object} params information about the assertion to be executed
+ */
+// beforeAssertion: function(params) {
+// }
+/**
+ * Hook that gets executed after a WebdriverIO assertion happened.
+ * @param {object} params information about the assertion that was executed, including its results
+ */
+// afterAssertion: function(params) {
+// }

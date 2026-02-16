@@ -5,7 +5,6 @@ import {
   aeroplaneModeOn,
   aeroplaneModeOff,
   playTTS,
-  LiveTranscript,
   validate,
 } from "../../../helpers/helper.js";
 import AudioManager from "../screenObjectModel/audioManeger.js";

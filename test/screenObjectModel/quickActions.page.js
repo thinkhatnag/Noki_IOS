@@ -213,14 +213,15 @@ class QuickActions {
     await waitForElement(this.referalLetter);
     await RecordingPage.copyMailPrint();
   }
+  async NotesAndScales(){
+    
+  }
 }
-
 export default new QuickActions();
 
 // await driver.execute('mobile: swipe', { direction: 'up' });
 // await driver.execute('mobile: swipe', { direction: 'down' });
 // await driver.execute('mobile: swipe', { direction: 'down' });
-
 // await this.quickActions.click()
 // await verifyAndClick(this.translateSoapNote)
 // await verify(this.french)

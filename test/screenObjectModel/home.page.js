@@ -32,6 +32,9 @@ class HomePage {
     get home() {
         return $('//XCUIElementTypeButton[@value="1"]');
     }
+    get notNowBtn() {
+        return $(`~Not Now`);
+    }
 }
 
 export default new HomePage();

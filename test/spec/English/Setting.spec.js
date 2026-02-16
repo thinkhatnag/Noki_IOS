@@ -7,8 +7,9 @@ import SpanishLanguage from "../../screenObjectModel/spanishLanguage";
 beforeEach(() => {
   allureReporter.addSubSuite("Settings screen");
 });
-it.skip("Verify Settings screen Profille Edit #Skipped:-proffile edit is skipped due to Known Issue, related to Api change", async () => {
+it("Verify Settings screen Profille Edit #Skipped:-proffile edit is skipped due to Known Issue, related to Api change", async () => {
   await LoginPage.restartApp();
+  await driver.pause(5000);
   await verifyAndClick(HomePage.settings);
   await SettingsPage.profileSettingScreen();
 });

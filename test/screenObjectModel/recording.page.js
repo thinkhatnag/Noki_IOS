@@ -5,7 +5,6 @@ import {
   swipe,
   aeroplaneModeOn,
   aeroplaneModeOff,
-  LiveTranscript,
   playTTS,
 } from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
 import LoginPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page.js";
@@ -55,6 +54,9 @@ class RecordingPage {
   get doneBtn() {
     return $("~Done");
   }
+  get returnBtn() {
+    return $("~Return");
+  }
   get englishLanOpt() {
     return $("~English");
   }
@@ -63,7 +65,7 @@ class RecordingPage {
   }
   get confirmationText() {
     return $(
-      '//XCUIElementTypeTextView[@value="Please ensure you have verbal consent from the patient before using Noki\'s AI ambient scribe for clinical documentation. View Consent"]'
+      '//XCUIElementTypeTextView[@value="Please ensure you have verbal consent from the patient before using Noki\'s AI ambient scribe for clinical documentation. View Consent"]',
     );
   }
 
@@ -76,7 +78,7 @@ class RecordingPage {
   }
   get txtConfm() {
     return $(
-      "~Please ensure you have verbal consent from the patient before using Noki's AI ambient scribe for clinical documentation. View Consent"
+      "~Please ensure you have verbal consent from the patient before using Noki's AI ambient scribe for clinical documentation. View Consent",
     );
   }
   get pauseBtn() {
@@ -104,7 +106,7 @@ class RecordingPage {
   }
   get PrevEncounterRef() {
     return $(
-      "~Would you like to use the previous encounter's SOAP note as context?"
+      "~Would you like to use the previous encounter's SOAP note as context?",
     );
   }
   get PrevEncounterRefNo() {
@@ -128,12 +130,12 @@ class RecordingPage {
   }
   get patientInformation() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]',
     );
   }
   get subjective() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Subjective"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Subjective"]',
     );
   }
   get objective() {
@@ -303,7 +305,7 @@ class RecordingPage {
   }
   get cleanedTranscriptScroll() {
     return $(
-      '//XCUIElementTypeApplication[@name="Noki-T"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView'
+      '//XCUIElementTypeApplication[@name="Noki-T"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView',
     );
   }
   get offlineModeRTranscription() {
@@ -311,7 +313,7 @@ class RecordingPage {
   }
   get offlineConversationSaved() {
     return $(
-      `//XCUIElementTypeStaticText[@name="We’ve saved your conversation. It’ll sync when you’re connected again."]`
+      `//XCUIElementTypeStaticText[@name="We’ve saved your conversation. It’ll sync when you’re connected again."]`,
     );
   }
   get endEncounter() {
@@ -395,7 +397,7 @@ class RecordingPage {
 
   get finaliseEncounterTxt() {
     return $(
-      "~Are you sure to finalize the encounter and disable all the actions available ?"
+      "~Are you sure to finalize the encounter and disable all the actions available ?",
     );
   }
   get finaliseEncounterOk() {
@@ -418,32 +420,32 @@ class RecordingPage {
   }
   get PatientInfo() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Patient Information"]',
     );
   }
   get Subject() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Subjective"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Subjective"]',
     );
   }
   get Object() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Objective"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Objective"]',
     );
   }
   get Assessment() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Assessment"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Assessment"]',
     );
   }
   get Plan() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Plan"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Plan"]',
     );
   }
   get AdditionalInfo() {
     return $(
-      '//XCUIElementTypeStaticText[@name="main label" and @label="Additional Information"]'
+      '//XCUIElementTypeStaticText[@name="main label" and @label="Additional Information"]',
     );
   }
   get connectionLost() {
@@ -467,7 +469,7 @@ class RecordingPage {
   }
   get acknowledgeAndContinue() {
     return $(
-      '-ios class chain:**/XCUIElementTypeButton[`name == "Acknowledge & Continue"`]'
+      '-ios class chain:**/XCUIElementTypeButton[`name == "Acknowledge & Continue"`]',
     );
   }
   get networkFailureOk() {
@@ -493,7 +495,7 @@ class RecordingPage {
   async CDSS_Verification() {
     if (await this.notEnoughTranscript.isDisplayed()) {
       console.error(
-        "Recording failed: Please provide a proper medical conversation"
+        "Recording failed: Please provide a proper medical conversation",
       );
     } else {
       await waitForElement(this.SoapNoteBtn);
@@ -514,12 +516,12 @@ class RecordingPage {
     } else if (this.CDSSLimitExceded.isDisplayed()) {
       console.error(
         "\x1b[31m%s\x1b[0m",
-        "Kindly please verify the CDSS is off / your CDSS subscription is over"
+        "Kindly please verify the CDSS is off / your CDSS subscription is over",
       );
     }
   }
   async Transcript_Verification() {
-    await waitForElement(this.Transcript);
+    await verify(this.Transcript);
     await driver.pause(3000);
     await verifyAndClick(this.Transcript);
     await this.dataScaning(this.cleanedTranscriptScroll);
@@ -550,7 +552,7 @@ class RecordingPage {
     await verify(this.pauseBtn);
     await this.recordAudioAndSaveAsDraft();
     console.log(
-      "Here we are making the transcription as draft for verifying the flow of the draft trancript resuming and finalizing Encounter with a draft transcript."
+      "Here we are making the transcription as draft for verifying the flow of the draft trancript resuming and finalizing Encounter with a draft transcript.",
     );
     await driver.pause(3000);
     await LoginPage.restartApp();
@@ -562,15 +564,15 @@ class RecordingPage {
     await verifyAndClick(this.finaliseEncounter);
     await driver.pause(3000);
     console.log(
-      "here we have verified that enounter will not be finalized consisting of draft transcript"
+      "here we have verified that enounter will not be finalized consisting of draft transcript",
     );
     await verifyAndClick(this.C_OK);
     await verifyAndClick(this.resumeConversationForMultipleConverstionScenario);
     await verifyAndClick(
-      this.resumeConversationForMultipleConverstionScenarioYes
+      this.resumeConversationForMultipleConverstionScenarioYes,
     );
     console.log(
-      "Here we are continueng our converstion  with a draft transcription"
+      "Here we are continueng our converstion  with a draft transcription",
     );
     await this.recordAudio();
   }
@@ -600,8 +602,8 @@ class RecordingPage {
 
   async finalize_Encounter() {
     await waitForElement(this.SoapNoteBtn);
-    await verifyAndClick(this.SoapNoteScreenTxtField);
-    await verifyAndClick(this.doneBtn);
+    // await verifyAndClick(this.SoapNoteScreenTxtField);
+    // await verifyAndClick(this.returnBtn);
     await verifyAndClick(this.finaliseEncounter);
     await verifyAndClick(this.finaliseEncounterOk);
     await driver.pause(20000);
@@ -636,7 +638,7 @@ class RecordingPage {
       await verify(this.SoapNoteBtn);
     } catch (error) {
       console.error(
-        "the soap note is not yet realy displayed or somthing unexpected happened"
+        "the soap note is not yet realy displayed or somthing unexpected happened",
       );
     }
   }
@@ -671,20 +673,20 @@ class RecordingPage {
 
     await driver.pause(5000);
     await AudioManeger.pauseAudio();
-    await driver.terminateApp("com.thinkhat.nokiTest"); // step verifying the app screen to be in recording screen only even in offline
+    await driver.terminateApp(process.env.BUNDLE_ID); // step verifying the app screen to be in recording screen only even in offline
     await driver.pause(10000);
-    await driver.activateApp("com.thinkhat.nokiTest");
+    await driver.activateApp(process.env.BUNDLE_ID);
     await waitForElement(this.ContinueBtn);
     await verifyAndClick(this.ContinueBtn);
     console.log(
-      "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
+      "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page",
     );
     await AudioManeger.resumeAudio();
     await driver.pause(60000);
     await AudioManeger.stopAudio();
     await verifyAndClick(this.stopBtn);
     console.log(
-      "here after app got closed while recording we magaing automatically again resumed the audio"
+      "here after app got closed while recording we magaing automatically again resumed the audio",
     );
     await driver.pause(5000);
     await verify(this.offlineConversationSaved);
@@ -696,7 +698,7 @@ class RecordingPage {
       .move({ duration: 1000, x: 354, y: 720 })
       .up({ button: 0 })
       .perform();
-    const airplaneModeBtn = await $("~com.apple.ControlCenter.Airplane");
+    const airplaneModeBtn = await $("~airplane-mode-button");
     await verifyAndClick(airplaneModeBtn);
 
     await driver
@@ -708,7 +710,7 @@ class RecordingPage {
       .perform(); // device come to online
     await driver.pause(5000);
     console.log(
-      "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved"
+      "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved",
     );
   }
   async recordAudioforOfflineForExistingPatient() {
@@ -764,26 +766,26 @@ class RecordingPage {
     if (firstMarkerIndex !== -1) {
       textToSave = combinedText.substring(0, firstMarkerIndex).trim();
       console.log(
-        `🛑 Found stop marker at index ${firstMarkerIndex}. Saving only text BEFORE it.`
+        `🛑 Found stop marker at index ${firstMarkerIndex}. Saving only text BEFORE it.`,
       );
     } else {
       console.log(`✅ No stop markers found. Saving ALL scanned content.`);
     }
 
     // 4️⃣ Split into lines and remove empty lines
-const seen = new Set();
-const finalContentArray = [];
+    const seen = new Set();
+    const finalContentArray = [];
 
-textToSave
-  .split("\n")
-  .map(line => line.trim())
-  .filter(line => line.length > 0)
-  .forEach(line => {
-    if (!seen.has(line)) {
-      seen.add(line);           // keep FIRST occurrence
-      finalContentArray.push(line);
-    }
-  });
+    textToSave
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .forEach((line) => {
+        if (!seen.has(line)) {
+          seen.add(line); // keep FIRST occurrence
+          finalContentArray.push(line);
+        }
+      });
 
     // 5️⃣ Save to file
     const dirPath = "./_results_";
@@ -801,7 +803,7 @@ textToSave
 
   async bloodGroup(name) {
     return $(
-      `//XCUIElementTypeStaticText[@name="main label" and @label="${name}"]`
+      `//XCUIElementTypeStaticText[@name="main label" and @label="${name}"]`,
     );
   }
 
@@ -813,7 +815,7 @@ textToSave
   }
   get titleTextField() {
     return $(
-      '-ios class chain:**/XCUIElementTypeOther[`name == "Stack view"`]/XCUIElementTypeOther[7]/XCUIElementTypeOther/XCUIElementTypeTextView[1]'
+      '-ios class chain:**/XCUIElementTypeOther[`name == "Stack view"`]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[1]',
     );
   }
   get Discription() {
@@ -821,7 +823,7 @@ textToSave
   }
   get discriptionTextField() {
     return $(
-      '-ios class chain:**/XCUIElementTypeOther[`name == "Stack view"`]/XCUIElementTypeOther[7]/XCUIElementTypeOther/XCUIElementTypeTextView[2]'
+      '-ios class chain:**/XCUIElementTypeOther[`name == "Stack view"`]/XCUIElementTypeOther[6]/XCUIElementTypeOther/XCUIElementTypeTextView[2]',
     );
   }
   async UpdatePatientInfo() {
@@ -841,12 +843,12 @@ textToSave
   }
   get SoapNoteScreenTxtField() {
     return $(
-      '//XCUIElementTypeTextView[@value="Click on the mic and start speaking.."]'
+      '//XCUIElementTypeTextView[@value="Click on the mic and start speaking.."]',
     );
   }
   get SoapNoteScreenTxtFieldEntry() {
     return $(
-      "-ios class chain:**/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther"
+      "-ios class chain:**/XCUIElementTypeWindow[1]/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[3]/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[2]/XCUIElementTypeOther[1]/XCUIElementTypeOther",
     );
   }
 
@@ -854,7 +856,7 @@ textToSave
     await waitForElement(this.SoapNoteScreenTxtField);
     await verifyAndClick(this.SoapNoteScreenTxtField);
     await this.SoapNoteScreenTxtFieldEntry.setValue("Blood Group O negitive");
-    await verifyAndClick(this.doneBtn);
+    // await verifyAndClick(this.returnBtn);
     await verifyAndClick(this.send);
     await waitForElement(this.C_OK);
     await verifyAndClick(this.C_OK);

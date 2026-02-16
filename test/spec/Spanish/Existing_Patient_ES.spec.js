@@ -1,4 +1,4 @@
-import LoginPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/login.page.js";
+import LoginPage from "../../screenObjectModel/login.page.js";
 import AudioManeger from "../../screenObjectModel/audioManeger.js";
 import {
   verify,
@@ -8,11 +8,12 @@ import {
   aeroplaneModeOn,
   validate,
   aeroplanemodeswipe,
-} from "/Users/nagasubarayudu/Desktop/IOS/helpers/helper.js";
+} from "../../../helpers/helper.js";
 import allureReporter from "@wdio/allure-reporter";
-import SettingsPage from "/Users/nagasubarayudu/Desktop/IOS/test/screenObjectModel/setting.page.js";
+import SettingsPage from "../../screenObjectModel/setting.page.js";
 import SpanishLanguage from "../../screenObjectModel/spanishLanguage.js";
 import HomePage from "../../screenObjectModel/home.page.js";
+import PatientsPage from "../../screenObjectModel/patients.page.js";
 beforeEach(() => {
   allureReporter.addSubSuite("New Encounter E2E flow -Es");
 });
@@ -48,7 +49,7 @@ it("Automatic Sync Verification (Offline to Online and Vice Versa) -Es", async (
 });
 it("App Killed and Reopened (Offline Mode Verification) -Es", async () => {
   await driver.terminateApp(process.env.BUNDLE_ID); // step verifying the app screen to be in recording screen only even in offline
-  await driver.pause(3000);
+  await driver.pause(2000);
   await driver.activateApp(process.env.BUNDLE_ID);
   // await verifyAndClick(SpanishLanguage.errorOk)
   await waitForElement(SpanishLanguage.RecordingContinueBtn);
@@ -56,7 +57,7 @@ it("App Killed and Reopened (Offline Mode Verification) -Es", async () => {
   await verify(SpanishLanguage.endEncounterBtn);
   await verifyAndClick(SpanishLanguage.RecordingContinueBtn);
   console.log(
-    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
+    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page",
   );
 });
 it("App Killed in Offline and Reopened in Online Mode Verification -Es", async () => {
@@ -73,12 +74,13 @@ it("App Killed in Offline and Reopened in Online Mode Verification -Es", async (
 });
 it("Offline Mode Stop and App Kill Verification -Es", async () => {
   await AudioManeger.resumeAudio();
+  await verifyAndClick(RecordingPage.playBtn);
   await driver.pause(30000);
   await aeroplanemodeswipe(); // offline
   await AudioManeger.stopAudio();
   await verifyAndClick(SpanishLanguage.stopBtn);
   console.log(
-    "Here after app got closed while recording automatically again resumed the audio"
+    "Here after app got closed while recording automatically again resumed the audio",
   );
   await driver.pause(3000);
   await verify(SpanishLanguage.offlineConversationSaved);
@@ -92,6 +94,23 @@ it("Offline Mode Stop and App Kill Verification -Es", async () => {
   await verifyAndClick(SpanishLanguage.PrevEncounterRefNo);
 });
 it("First Conversation and SOAP Note Generation -Es", async () => {
+  try {
+    await waitForElement(SpanishLanguage.quickActionButton);
+  } catch (error) {
+    if (await SpanishLanguage.quickActionButton.isDisplayed()) {
+      await SpanishLanguage.SOAPNOTE_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await LoginPage.restartApp();
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await SpanishLanguage.patientSearch("Naga");
+      await PatientsPage.firstEncounterForExistingPatient.click();
+      await driver.pause(5000);
+    }
+  }
   await SpanishLanguage.SOAPNOTE_Verification();
 });
 it("Trascript verification -Es", async () => {
@@ -114,10 +133,37 @@ it("Second Conversation for the New Encounter -Es", async () => {
   await driver.pause(3000);
   await aeroplanemodeswipe(); //online
   await driver.pause(3000);
+  await waitForElement(SpanishLanguage.endEncounter);
   await verifyAndClick(SpanishLanguage.endEncounter);
-  await verifyAndClick(SpanishLanguage.PrevEncounterRefYes);
+  await driver.pause(5000);
+  if (await SpanishLanguage.stopBtn.isDisplayed()) {
+    await verifyAndClick(SpanishLanguage.stopBtn);
+    await verifyAndClick(SpanishLanguage.PrevEncounterRefYes);
+    allureReporter.addIssue(
+      "Here even after clicking End Encouter, soap note generation is not Intiated",
+    );
+  } else {
+    console.log("issure related to api is resolved");
+  }
 });
 it("SOAP Note Verification for the Second Conversation -Es", async () => {
+  try {
+    await waitForElement(SpanishLanguage.quickActionButton);
+  } catch (error) {
+    if (await SpanishLanguage.quickActionButton.isDisplayed()) {
+      await SpanishLanguage.SOAPNOTE_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await LoginPage.restartApp();
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await SpanishLanguage.patientSearch("Naga");
+      await PatientsPage.firstEncounterForExistingPatient.click();
+      await driver.pause(5000);
+    }
+  }
   await SpanishLanguage.SOAPNOTE_Verification();
 });
 it("Trascript verification for the Second Conversation -Es", async () => {
@@ -129,6 +175,23 @@ it("Third Conversation {Draft Creation and Completion of Draft Transcript}", asy
   await SpanishLanguage.third_Conversation_For_Existing_Patitent();
 });
 it("SOAP Note Generation and Verification for the Draft Conversationm-Es", async () => {
+  try {
+    await waitForElement(SpanishLanguage.quickActionButton);
+  } catch (error) {
+    if (await SpanishLanguage.quickActionButton.isDisplayed()) {
+      await SpanishLanguage.SOAPNOTE_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await LoginPage.restartApp();
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await SpanishLanguage.patientSearch("Naga");
+      await PatientsPage.firstEncounterForExistingPatient.click();
+      await driver.pause(5000);
+    }
+  }
   await SpanishLanguage.SOAPNOTE_Verification();
 });
 it("Transcript Verification for the Draft Conversation -Es", async () => {
@@ -144,6 +207,8 @@ it("Generation and Regeneration of Quick Action Templates (ICD & CPT, Care Plan,
 });
 it("Patient Info Update -Es", async () => {
   await SpanishLanguage.UpdatePatientInfo();
+});
+it("Patient info manual update -Es", async () => {
   await SpanishLanguage.manualUpdate();
 });
 

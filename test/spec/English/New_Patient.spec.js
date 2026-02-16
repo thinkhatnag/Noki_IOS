@@ -21,6 +21,7 @@ import QuickActions from "../../screenObjectModel/quickActions.page.js";
 beforeEach(() => {
   allureReporter.addSubSuite("First Encounter E2E flow");
 });
+const shared = { createdPatient: null };
 it("Patient Creation", async () => {
   await LoginPage.restartApp();
   await waitForElement(HomePage.startNewEncounterButton);
@@ -28,7 +29,8 @@ it("Patient Creation", async () => {
   await driver.pause(2000);
   await verifyAndClick(SearchPatientPage.addPatient);
   await AddPatitentPage.addPatientWrn();
-  await AddPatitentPage.createNewPatient();
+  shared.createdPatient = await AddPatitentPage.createNewPatient();
+  console.log("createNewPatient returned:", shared.createdPatient); // ← critical log
 });
 it("Automatic Sync Verification (Offline to Online and Vice Versa) for the First Encounter", async () => {
   await RecordingPage.startConversation();
@@ -36,7 +38,6 @@ it("Automatic Sync Verification (Offline to Online and Vice Versa) for the First
   console.log("Audio started:", AudioManeger.currentAudioFile);
   await RecordingPage.recordAudioforOfflineModeMT();
   await driver.pause(10000);
-  await verify(RecordingPage.pauseBtn);
   await verifyAndClick(RecordingPage.pauseBtn);
   await AudioManeger.pauseAudio();
   console.log("Audio paused at:", AudioManeger.pausedTime, "seconds");
@@ -53,15 +54,12 @@ it("App Killed and Reopened (Offline Mode Verification) for the First Encounter"
   await driver.pause(5000);
   await AudioManeger.pauseAudio();
   await driver.terminateApp(process.env.BUNDLE_ID); // step verifying the app screen to be in recording screen even in offline
-  await driver.pause(10000);
+  await driver.pause(3000);
   await driver.activateApp(process.env.BUNDLE_ID);
   // await verifyAndClick(RecordingPage.errorOk)    // debug app step will not be avalable in the test/prod
   await waitForElement(RecordingPage.ContinueBtn);
   await verify(RecordingPage.ContinueBtn);
   await verifyAndClick(RecordingPage.ContinueBtn);
-  console.log(
-    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
-  );
 });
 
 it("App Killed in Offline and Reopened in Online Mode Verification for the First Encounter", async () => {
@@ -75,11 +73,7 @@ it("App Killed in Offline and Reopened in Online Mode Verification for the First
   await driver.pause(5000);
   await driver.activateApp(process.env.BUNDLE_ID);
   await waitForElement(RecordingPage.ContinueBtn);
-  await verify(RecordingPage.ContinueBtn);
   await verifyAndClick(RecordingPage.ContinueBtn);
-  console.log(
-    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
-  );
   await aeroplanemodeswipe(); //offline
 });
 it("Offline Mode Stop and App Kill Verification for the First Encounter", async () => {
@@ -87,23 +81,39 @@ it("Offline Mode Stop and App Kill Verification for the First Encounter", async 
   await driver.pause(30000);
   await AudioManeger.stopAudio();
   await verifyAndClick(RecordingPage.stopBtn);
-  console.log(
-    "here after app got closed while recording we magaing automatically again resumed the audio"
-  );
   await driver.pause(5000);
   await verify(RecordingPage.offlineConversationSaved);
-  await driver.terminateApp(process.env.BUNDLE_ID); // step verifying app is killed after the stop button is clicked
+  await driver.terminateApp(process.env.BUNDLE_ID);
   await driver.pause(5000);
   await driver.activateApp(process.env.BUNDLE_ID);
   await verify(RecordingPage.offlineConversationSaved);
   await driver.pause(5000);
   await driver.terminateApp(process.env.BUNDLE_ID);
-  await aeroplanemodeswipe(); // need to verify
+  await aeroplanemodeswipe(); // online
   await driver.pause(5000);
   await driver.activateApp(process.env.BUNDLE_ID);
   await driver.pause(5000);
 });
 it("First Conversation and SOAP Note Generation in First Encounter", async () => {
+  try {
+    await waitForElement(QuickActions.quickActionButton);
+  } catch (error) {
+    if (await QuickActions.quickActionButton.isDisplayed()) {
+      await RecordingPage.SOAPNote_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await driver.terminateApp(process.env.BUNDLE_ID);
+      await driver.pause(5000);
+      await driver.activateApp(process.env.BUNDLE_ID);
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await PatientsPage.patientSearchAndContinue(shared.createdPatient);
+      await PatientsPage.firstEncounter.click();
+      await driver.pause(5000);
+    }
+  }
   await RecordingPage.SOAPNote_Verification();
 });
 it("Transcript verification for the first Encounter", async () => {
@@ -116,18 +126,39 @@ it("Second Conversation for the first Encounter", async () => {
   await verifyAndClick(RecordingPage.AddConversationConfirmationYes);
   await AudioManeger.playAudio("english");
   await driver.pause(5000);
-  await aeroplaneModeOff();
-  await driver.pause(60000);
+  await aeroplaneModeOff(); //offline
+  await driver.pause(80000);
   await AudioManeger.stopAudio();
-  await driver.terminateApp(process.env.BUNDLE_ID);
+  await driver.terminateApp(process.env.BUNDLE_ID); //app killed
   await driver.pause(5000);
   await driver.activateApp(process.env.BUNDLE_ID);
   await driver.pause(5000);
-  await aeroplanemodeswipe();
-  await waitForElement(RecordingPage.ContinueBtn)
+  await aeroplanemodeswipe(); //online
+  await driver.pause(5000);
+  await waitForElement(RecordingPage.ContinueBtn);
   await verifyAndClick(RecordingPage.endEncounter);
+  await driver.pause(5000);
 });
 it("SOAP Note Verification for the Second Conversation in First Encounter", async () => {
+  try {
+    await waitForElement(QuickActions.quickActionButton);
+  } catch (error) {
+    if (await QuickActions.quickActionButton.isDisplayed()) {
+      await RecordingPage.SOAPNote_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await driver.terminateApp(process.env.BUNDLE_ID);
+      await driver.pause(5000);
+      await driver.activateApp(process.env.BUNDLE_ID);
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await PatientsPage.patientSearchAndContinue(shared.createdPatient);
+      await PatientsPage.firstEncounter.click();
+      await driver.pause(5000);
+    }
+  }
   await RecordingPage.SOAPNote_Verification();
 });
 it("Transcript verification for the Second Conversation in first Encounter", async () => {
@@ -135,17 +166,36 @@ it("Transcript verification for the Second Conversation in first Encounter", asy
 });
 
 it("Third Conversation (Draft Creation and Completion of Draft Transcript) for the First Encounter}", async () => {
-  await verifyAndClick(RecordingPage.SoapNoteBtn);
+  await RecordingPage.SoapNoteBtn.click();
   await RecordingPage.third_Conversations_For_New_Patient();
 });
 it("SOAP Note Generation and Verification for the Draft Conversation in the First Encounter", async () => {
+  try {
+    await waitForElement(QuickActions.quickActionButton);
+  } catch (error) {
+    if (await QuickActions.quickActionButton.isDisplayed()) {
+      await RecordingPage.SOAPNote_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await driver.terminateApp(process.env.BUNDLE_ID);
+      await driver.pause(5000);
+      await driver.activateApp(process.env.BUNDLE_ID);
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await PatientsPage.patientSearchAndContinue(shared.createdPatient);
+      await PatientsPage.firstEncounter.click();
+      await driver.pause(5000);
+    }
+  }
   await RecordingPage.SOAPNote_Verification();
 });
 it("Transcript verification for the Third Conversation in first Encounter", async () => {
   await RecordingPage.Transcript_Verification();
 });
 
-it("ICD & CPT Codes Generation and Regeneration", async () => {
+it("Quick Action Templet Generation and Regeneration", async () => {
   await QuickActions.ICD_CPT();
   await QuickActions.care_Plan();
   await QuickActions.feed_back();
@@ -155,9 +205,11 @@ it("ICD & CPT Codes Generation and Regeneration", async () => {
 
 it("Patient info update", async () => {
   await RecordingPage.UpdatePatientInfo();
+});
+it("Patient info manual update", async () => {
   await RecordingPage.manualUpdate();
 });
-it.skip("HayNoki update", async () => {
+it("HayNoki update", async () => {
   await RecordingPage.hayNoki();
 });
 

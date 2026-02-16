@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { exec } from "child_process";
 import allureReporter from "@wdio/allure-reporter";
 import AudioManager from "../test/screenObjectModel/audioManeger.js";
 import RecordingPage from "../test/screenObjectModel/recording.page.js";
@@ -18,7 +18,7 @@ export async function verifyAndClick(element) {
   await element.click();
 }
 
-export async function waitForElement(element, timeout = 240000) {
+export async function waitForElement(element, timeout = 150000) {
   await element?.waitForDisplayed({ timeout });
 }
 
@@ -47,9 +47,12 @@ export async function aeroplaneModeOn() {
     .move({ duration: 1000, x: 337, y: 704 })
     .up({ button: 0 })
     .perform();
-  await driver.pause(1000);
-  const airplaneModeBtn = await $("~airplane-mode-button");
-  await airplaneModeBtn.click();
+  const contexts = await driver.getContexts();
+  console.log(contexts);
+
+  await driver.pause(2000);
+  const airplaneModeBtn = await $("~wifi-button");
+  await verifyAndClick(airplaneModeBtn);
   await driver.pause(1000);
   await driver
     .action("pointer")
@@ -75,8 +78,9 @@ export async function aeroplaneModeOff() {
     .move({ duration: 1000, x: 337, y: 704 })
     .up({ button: 0 })
     .perform();
-  const airplaneModeBtn = await $("~airplane-mode-button");
-  await airplaneModeBtn.click();
+  await driver.pause(2000);
+  const airplaneModeBtn = await $("~wifi-button");
+  await verifyAndClick(airplaneModeBtn);
   await driver.pause(2000);
   await driver
     .action("pointer")
@@ -124,16 +128,23 @@ export async function levenshtein(a, b) {
   return matrix[a.length][b.length];
 }
 
-export async function playTTS(text, voice = null, speed = 1.0) {
+export async function playTTS(text, voice = null, speed = 1.0, volume = 0.8) {
   return new Promise((resolve, reject) => {
-    say.speak(text, voice, speed, (err) => {
-      if (err) {
-        console.error("TTS failed:", err);
-        reject(err);
-      } else {
-        console.log("TTS spoken:", text);
-        resolve();
-      }
+    // Convert volume 0.0–1.0 to macOS system volume scale 0–100
+    const volPercent = Math.min(Math.max(volume * 100, 0), 100);
+
+    // Set system volume temporarily
+    exec(`osascript -e "set volume output volume ${volPercent}"`, (err) => {
+      if (err) console.error("Failed to set volume:", err);
+      say.speak(text, voice, speed, (err) => {
+        if (err) {
+          console.error("TTS failed:", err);
+          reject(err);
+        } else {
+          console.log("TTS spoken:", text);
+          resolve();
+        }
+      });
     });
   });
 }
@@ -146,8 +157,8 @@ export async function aeroplanemodeswipe() {
     .move({ duration: 1000, x: 337, y: 704 })
     .up({ button: 0 })
     .perform();
-  const airplaneModeBtn = await $("~airplane-mode-button");
-  await (await airplaneModeBtn).click();
+  const airplaneModeBtn = await $("~wifi-button");
+  await verifyAndClick(airplaneModeBtn);
   await driver.pause(2000);
   await driver
     .action("pointer")

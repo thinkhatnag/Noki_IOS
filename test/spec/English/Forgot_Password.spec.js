@@ -31,7 +31,7 @@ it(`Error message verification: "Invalid Email"`, async () => {
 
 it(`Error message verifcation: "Email not Enterd"`, async () => {
   await verifyAndClick(LoginPage.forgotPassword);
-  await LoginPage.enterForgotPasswordEmail("  ");
+  await LoginPage.enterForgotPasswordEmail(" ");
   await verify(LoginPage.emailError);
   await verifyAndClick(LoginPage.loginLink);
 });
@@ -41,6 +41,7 @@ it(`Verify Rest Password mail generation`, async () => {
   console.log("Email env:", process.env.Email);
   await LoginPage.enterForgotPasswordEmail(process.env.Email);
   await verify(LoginPage.successMessageForResetLink);
-  await verifyAndClick(LoginPage.continueToLogin);
-  await validate(LoginPage.emailField);
+  await verifyAndClick(LoginPage.continueToLoginr);
+  await LoginPage.activategmailApp();
+  await LoginPage.restartApp();
 });

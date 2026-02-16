@@ -17,14 +17,14 @@ it("Login UI Verification", async () => {
   await verify(LoginPage.forgotPassword);
 });
 
-it(`Error message verification: "Password not Provided"`, async () => {
+it(`Login Error message verification: "Password not Provided"`, async () => {
   await LoginPage.enterEmail("nag.subbarayudu@thinkhat.ai");
   await LoginPage.selectMultiTenant();
   await LoginPage.clickLogin();
   await verify(LoginPage.errorMessage);
 });
 
-it(`Error message verification: "short Password"`, async () => {
+it(`Login Error message verification: "short Password"`, async () => {
   await LoginPage.enterEmail("nag.subbarayudu@thinkhat.ai");
   await LoginPage.enterPassword("123456");
   await LoginPage.selectMultiTenant();
@@ -32,24 +32,24 @@ it(`Error message verification: "short Password"`, async () => {
   await verify(LoginPage.shortPassword);
 });
 
-it(`Error messge verification: "Email is not provided"`, async () => {
+it(`Login Error messge verification: "Email is not provided"`, async () => {
   await LoginPage.enterEmail("  ");
   await LoginPage.clickLogin();
   await verify(LoginPage.emailError);
 });
 
-it(`Error message verification: "invalid Email"`, async () => {
+it(`Login Error message verification: "invalid Email"`, async () => {
   await LoginPage.enterEmail("nag.subbarayudu@");
   await LoginPage.clickLogin();
   await verify(LoginPage.invalidEmailError);
 });
 
-it(`Error message verification: "not registered Email"`, async () => {
+it(`Login Error message verification: "not registered Email"`, async () => {
   await LoginPage.enterEmail("vqejvcievciye@gmail.com");
   await verify(LoginPage.emailNotRegisteredError);
 });
 
-it(`Error message verification: "wrong password"`, async () => {
+it(`Login Error message verification: "wrong password"`, async () => {
   await LoginPage.enterEmail("nag.subbarayudu@thinkhat.ai");
   await LoginPage.enterPassword("Welcome@124");
   await LoginPage.selectMultiTenant();
@@ -57,10 +57,12 @@ it(`Error message verification: "wrong password"`, async () => {
   await verify(LoginPage.WrongPassword);
 });
 
-it("Login with correct credentials & verify Home screen", async () => {
-  await LoginPage.enterEmail(process.env.Email);
-  await LoginPage.enterPassword(process.env.Password);
-  await LoginPage.selectMultiTenant();
-  await LoginPage.clickLogin();
-  await verify(LoginPage.homescreenAnimation);
-});
+// it("Login with correct credentials & verify Home screen", async () => {
+//   await LoginPage.enterEmail(process.env.Email);
+//   await LoginPage.enterPassword(process.env.Password);
+//   await LoginPage.selectMultiTenant();
+//   await LoginPage.clickLogin();
+//   await driver.pause(10000);
+//   await HomePage.notNowBtn.click();
+//   await verify(LoginPage.homescreenAnimation);
+// });

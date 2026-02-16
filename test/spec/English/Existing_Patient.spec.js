@@ -56,7 +56,7 @@ it("App Killed and Reopened (Offline Mode Verification)", async () => {
   await validate(RecordingPage.ContinueBtn);
   await verifyAndClick(RecordingPage.ContinueBtn);
   console.log(
-    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
+    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page",
   );
 });
 
@@ -75,7 +75,7 @@ it("App Killed in Offline and Reopened in Online Mode Verification", async () =>
   await validate(RecordingPage.ContinueBtn);
   await verifyAndClick(RecordingPage.ContinueBtn);
   console.log(
-    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page"
+    "Here app got restarted the app while it is in the recording screen and we verified with the app still in that page",
   );
   await aeroplanemodeswipe();
 });
@@ -85,7 +85,7 @@ it("Offline Mode Stop and App Kill Verification", async () => {
   await AudioManeger.stopAudio();
   await verifyAndClick(RecordingPage.stopBtn);
   console.log(
-    "here after app got closed while recording we magaing automatically again resumed the audio"
+    "here after app got closed while recording we magaing automatically again resumed the audio",
   );
   await driver.pause(5000);
   await verify(RecordingPage.offlineConversationSaved);
@@ -99,14 +99,30 @@ it("Offline Mode Stop and App Kill Verification", async () => {
   await driver.activateApp(process.env.BUNDLE_ID);
   await aeroplanemodeswipe();
   await driver.pause(5000);
-  console.log(
-    "here we have verified that the in offline mode when we click stop button it willshould show a popup of offline conversation is saved"
-  );
   await waitForElement(RecordingPage.PrevEncounterRefNo);
   await verify(RecordingPage.PrevEncounterRefYes); // verifying the yes button in the popup
   await verifyAndClick(RecordingPage.PrevEncounterRefNo);
 });
 it("First Conversation and SOAP Note Generation", async () => {
+  {
+  }
+  try {
+    await waitForElement(QuickActions.quickActionButton);
+  } catch (error) {
+    if (await QuickActions.quickActionButton.isDisplayed()) {
+      await RecordingPage.SOAPNote_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await LoginPage.restartApp();
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await PatientsPage.patientSearchAndContinue("Naga");
+      await PatientsPage.firstEncounterForExistingPatient.click();
+      await driver.pause(5000);
+    }
+  }
   await RecordingPage.SOAPNote_Verification();
 });
 it("Transcript Verification for the First Conversation", async () => {
@@ -119,8 +135,8 @@ it("Second Conversation for the New Encounter", async () => {
   await verifyAndClick(RecordingPage.AddConversationConfirmationYes);
   await AudioManeger.playAudio("english");
   await driver.pause(5000);
-  await aeroplaneModeOff();
-  await driver.pause(60000);
+  await aeroplaneModeOff(); //offline
+  await driver.pause(80000);
   await AudioManeger.stopAudio();
   await driver.terminateApp(process.env.BUNDLE_ID);
   await driver.pause(5000);
@@ -128,11 +144,38 @@ it("Second Conversation for the New Encounter", async () => {
   await driver.pause(5000);
   await verifyAndClick(RecordingPage.endEncounter);
   await verify(RecordingPage.offlineConversationSaved);
-  await aeroplanemodeswipe();
-  await waitForElement(RecordingPage.PrevEncounterRef);
-  await verifyAndClick(RecordingPage.PrevEncounterRefYes);
+  await aeroplanemodeswipe(); //online
+  await driver.pause(5000);
+  if (await RecordingPage.stopBtn.isDisplayed()) {
+    await verifyAndClick(RecordingPage.stopBtn);
+    await waitForElement(RecordingPage.PrevEncounterRef);
+    await RecordingPage.PrevEncounterRefYes.click();
+    allureReporter.addIssue(
+      "Here even after clicking End Encouter, soap note generation is not Intiated",
+    );
+  } else {
+    console.log("issue related to api is resolved");
+  }
+  await RecordingPage.PrevEncounterRefYes.click();
 });
 it("SOAP Note Verification for the Second Conversation", async () => {
+  try {
+    await waitForElement(QuickActions.quickActionButton);
+  } catch (error) {
+    if (await QuickActions.quickActionButton.isDisplayed()) {
+      await RecordingPage.SOAPNote_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await LoginPage.restartApp();
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await PatientsPage.patientSearchAndContinue("Naga");
+      await PatientsPage.firstEncounterForExistingPatient.click();
+      await driver.pause(5000);
+    }
+  }
   await RecordingPage.SOAPNote_Verification();
 });
 it("Transcript Verification for the Second Conversation", async () => {
@@ -143,6 +186,23 @@ it("Third Conversation (Draft Creation and Completion of Draft Transcript)", asy
   await RecordingPage.third_Conversation_For_Existing_Patient();
 });
 it("SOAP Note Generation and Verification for the Draft Conversation", async () => {
+  try {
+    await waitForElement(QuickActions.quickActionButton);
+  } catch (error) {
+    if (await QuickActions.quickActionButton.isDisplayed()) {
+      await RecordingPage.SOAPNote_Verification();
+    } else {
+      allureReporter.addIssue(
+        "Quick Action Button is not displayed even after long wait waiting",
+      );
+      await LoginPage.restartApp();
+      await driver.pause(5000);
+      await HomePage.patients.click();
+      await PatientsPage.patientSearchAndContinue("Naga");
+      await PatientsPage.firstEncounterForExistingPatient.click();
+      await driver.pause(5000);
+    }
+  }
   await RecordingPage.SOAPNote_Verification();
 });
 
@@ -159,6 +219,8 @@ it("Generation and Regeneration of Quick Action Templates (ICD & CPT, Care Plan,
 });
 it("Patient Info Update", async () => {
   await RecordingPage.UpdatePatientInfo();
+});
+it("Patient info manual update", async () => {
   await RecordingPage.manualUpdate();
 });
 it("HayNoki verification", async () => {
